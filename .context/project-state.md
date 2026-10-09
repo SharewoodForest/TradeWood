@@ -96,6 +96,30 @@ Goal: raise launch liquidity from early supporters instead of out of pocket, and
 - **Needs decisions:** hard cap and soft cap ($), sale price and launch price, per-wallet min/max, whitelist round yes/no, vesting yes/no.
 - **Legal note:** token presales can raise securities and money-transmission questions depending on jurisdiction and marketing. Get legal input before opening the sale to the public.
 
+### Launch Plan — Multi-Prong (PROPOSED 2026-10-08)
+
+The Seed Sale is one path, not the only one. Revenue and growth run in parallel, and each launch path has a fallback.
+
+**Prong 1 — Revenue that doesn't depend on WOOD:** ship the **Sherwood Router** early. It earns its 0.10% fee on *any* swap (ETH, USDG, stock tokens) using Uniswap's existing liquidity. The business earns even if WOOD's launch is slow.
+
+**Prong 2 — Pre-launch demand (free, runs before and during the sale):**
+- Pre-launch quests: follow, join, register a wallet, refer friends. Points convert to WOOD from the quests budget and to Founding Outlaw whitelist spots.
+- Referral pre-registration, so links exist on day one and early recruiters lock in Founding rates.
+- Co-marketing with other Robinhood Chain projects through sponsored or joint quests.
+
+**Prong 3 — Launch-liquidity paths (pick based on the sale result):**
+
+| Path | When | Upfront cash needed | How it works |
+|---|---|---|---|
+| **A. Seed Sale** | Default | ~$0 | Early buyers fund it; ≥70% of the raise goes to locked LP (Section 3) |
+| **B. Single-sided Uniswap V3 launch** | Sale misses its soft cap | **$0** | Place WOOD-only liquidity in a price range above the start price; buyers' ETH fills the pool as they buy. Register the V3 pool with `setAmmPair` so tax applies. *Needs fork testing first.* |
+| **C. Bonding-curve fair launch** | Alternative to B | $0 | A contract sells WOOD on a rising price curve; at a raise target it creates the Uniswap pool automatically and locks the LP |
+| **D. Small owner seed + auto-LP** | Last resort | Whatever is comfortable | Launch limits protect the thin pool; the 2% auto-LP tax deepens it with volume |
+
+**Prong 4 — Outside liquidity:** liquidity-mining rewards from the 50% community allocation (Little John's LP Vault) attract LPs who bring their own ETH. This is the main way the pool grows after launch.
+
+**Decision rule:** if the sale reaches its soft cap, use Path A. If it misses, buyers get automatic refunds and launch switches to Path B or C within about a week, keeping the hype from the pre-launch quests. Prongs 1, 2 and 4 run no matter what.
+
 ### Merry Men Referral Program (APPROVED v1 — 2026-10-08)
 
 Design rule: **cash rewards come only from the treasury's cut, on referred volume only, and the treasury always keeps ≥70%.** Excitement comes from a **fixed $WOOD budget** carved from the Guild fund, so the program can never overspend.
@@ -184,6 +208,8 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [x] Verified live Robinhood Chain DEX contracts (Section 4)
 - [x] WoodToken.sol + 18 tests + mainnet-fork smoke test
 - [ ] SherwoodSeedSale contract (after sale numbers are decided)
+- [ ] Fork-test a single-sided V3 launch with WOOD's tax (fallback Path B)
+- [ ] Pre-launch quests + referral pre-registration (off-chain OK for v0)
 - [ ] **v1 contracts (cont.):** SherwoodRouter (fee) → FriarTuckVault → MerryMenReferral → tests → testnet (46630) → audit
 - [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
 - [ ] **v3:** Launchpad, sponsored quests
