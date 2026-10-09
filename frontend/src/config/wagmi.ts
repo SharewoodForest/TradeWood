@@ -21,11 +21,16 @@ const wallets = projectId
     ]
   : [{ groupName: "Browser wallets", wallets: [injectedWallet, coinbaseWallet] }];
 
-const connectors = connectorsForWallets(wallets, {
-  appName: "TradeWood",
-  appUrl: "https://tradewood.app",
-  projectId: projectId || "tradewood-no-walletconnect",
-});
+// Connectors touch browser-only APIs (indexedDB, window), so create them only in the browser.
+// During static pre-rendering the config has no connectors; the client instance gets the real ones.
+const connectors =
+  typeof window === "undefined"
+    ? []
+    : connectorsForWallets(wallets, {
+        appName: "TradeWood",
+        appUrl: "https://tradewood.app",
+        projectId: projectId || "tradewood-no-walletconnect",
+      });
 
 export const config = createConfig({
   chains: [robinhoodChain],
