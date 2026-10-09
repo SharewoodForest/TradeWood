@@ -6,7 +6,7 @@
 
 ## 1. Vision & Core Features
 
-**tradewood.app — "The Sherwood Protocol"** on Robinhood Chain. Standalone DeFi project, separate from T5D. Robin Hood / Sherwood Forest theme, dark cyber-forest UI.
+**tradewood.app — "The Sherwood Protocol"** on Robinhood Chain. Standalone DeFi project, separate from T5D **and from Sharewood Forest** (gift-a-share dapp — gift wrapping is NOT part of Tradewood). Robin Hood / Sherwood Forest theme, dark cyber-forest UI.
 
 | Module (UI tab) | What it does |
 |---|---|
@@ -15,7 +15,6 @@
 | **Merry Men** (Referrals) | On-chain referral links; referrers earn a share of fees from invited wallets; leaderboard; claimable rewards. |
 | **Quests** | Bounty Points for on-chain tasks (first swap, stake, refer, add LP); converted to $WOOD at the end of each 14-day epoch. |
 | **Analytics** | TVL, volume, burn, tokenomics breakdown. |
-| **Gift Wrapping Portal** *(from gemini-skills.md)* | Wrap stock tokens / tokens / ETH into an on-chain gift certificate with expiry fallback; pay in USDG or ETH with auto-swap via DEX. |
 
 ## 2. Shared Context Memory Bank (Contracts → Frontend)
 
@@ -28,7 +27,6 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 | Vaults | Not started | — | — |
 | Referral registry | Not started | — | — |
 | Quests / Epoch claims | Not started | — | — |
-| Gift escrow | Not started | — | — |
 
 ## 3. $WOOD Tokenomics (as discussed — not final)
 
@@ -66,7 +64,7 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 
 ## 6. Open Issues & Decisions Needed
 
-1. **Scope:** DEX + vaults + referrals + quests (chat/UI) vs. Gift Wrapping portal (gemini-skills). Build both, or which first?
+1. ~~Scope conflict~~ — **Resolved 2026-10-08:** gift wrapping was a mix-up with Sharewood Forest. Tradewood = DEX + vaults + referrals + quests.
 2. **UI mock errors to fix:** shows chain ID **7777**, "0% gas / $RH gas", and tokens `$RH`, `$rOKX`. The real chain is 4663 and gas is paid in ETH.
 3. **Chat inconsistencies:** a later reply used RPC `rpc.robinhoodchain.org`, chain ID 1337 and a plain mint/burn token without taxes. Ignore those; use Section 4.
 4. **Own DEX vs. existing DEX:** a full AMM, vaults and flash loans is a large audit surface. Option: launch WOOD on an existing Robinhood Chain DEX first and build Tradewood's own router later.
