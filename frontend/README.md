@@ -14,7 +14,7 @@ npm run build                 # static site → out/
 ## Environment (all public, embedded in the site)
 | Var | Purpose |
 |---|---|
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Mobile wallets (cloud.reown.com). Without it, only browser-extension wallets show. |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Mobile wallets (cloud.reown.com). **Set in `.env.production`** (it's a public ID, shipped in the site anyway). In the Reown dashboard, restrict allowed domains to `tradewood.app`. |
 | `NEXT_PUBLIC_SHERWOOD_ROUTER` | SherwoodRouter address. Empty → swap button shows "launching soon" (quotes still live). |
 | `NEXT_PUBLIC_WOOD_TOKEN` | WoodToken address. Empty → WOOD hidden from the token list. |
 | `NEXT_PUBLIC_RPC_URL` | Optional RPC override |

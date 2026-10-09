@@ -274,6 +274,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
 - [ ] **v3:** Launchpad, sponsored quests
 - [x] Frontend v0 (Next.js + wagmi, chain 4663): layout, live multi-venue swap UI, placeholder pages (branch `frontend/app`)
-- [ ] WalletConnect project ID + Cloudflare Pages deploy
+- [x] WalletConnect project ID set (`frontend/.env.production`); restrict domains to tradewood.app in the Reown dashboard
+- [ ] Cloudflare Pages deploy
 - [ ] Cloudflare Pages + tradewood.app DNS
 - [ ] Mainnet launch
