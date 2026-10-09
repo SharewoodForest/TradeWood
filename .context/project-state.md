@@ -6,7 +6,7 @@
 
 ## 1. Vision & Core Features
 
-**tradewood.app — "The Sherwood Protocol"** on Robinhood Chain. Standalone DeFi project, separate from T5D **and from Sharewood Forest** (gift-a-share dapp — gift wrapping is NOT part of Tradewood). Robin Hood / Sherwood Forest theme, dark cyber-forest UI.
+**tradewood.app — "The Sherwood Protocol"** *(naming: **Sherwood** = TradeWood's protocol/router/vaults; **Sharewood** = the separate Sharewood Forest gift app and the GitHub org. Keep them distinct.)* on Robinhood Chain. Standalone DeFi project, separate from T5D **and from Sharewood Forest** (gift-a-share dapp — gift wrapping is NOT part of Tradewood). Robin Hood / Sherwood Forest theme, dark cyber-forest UI.
 
 | Module (UI tab) | What it does |
 |---|---|
@@ -25,7 +25,7 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 | WoodToken ($WOOD) | **Written + tested** (18 unit tests, mainnet-fork buy/sell OK). Not deployed. | — | see 2.1 |
 | WOOD/WETH pair | Created automatically by the WoodToken constructor (Uniswap V2) | — | `mainPair()` |
 | SherwoodSeedSale (early buyers) | Spec only (Section 3) | — | — |
-| SherwoodRouter (fee) | Not started | — | — |
+| SherwoodRouter (multi-venue, 0.10% fee) | **Written + tested** (11 unit tests; mainnet-fork swaps via live V2 + V3 OK). Not deployed. | — | see 2.2 |
 | Vaults | Not started | — | — |
 | Referral registry | Not started | — | — |
 | Quests / Epoch claims | Not started | — | — |
@@ -49,6 +49,40 @@ Standard ERC-20 (name `TradeWood`, symbol `WOOD`, 18 decimals) + ERC-2612 `permi
 - WOOD sent straight to the token contract (outside the tax) isn't tracked and stays there.
 
 **Owner powers (all bounded):** tax capped at 5%/side · limits can't go below 0.5% tx / 1% wallet · `enableTrading` and `removeLimits` are one-way · can't withdraw accrued WOOD tax · two-step ownership transfer. Vault, sale and referral contracts must be set `isFeeExempt` + `isLimitExempt`.
+
+### 2.2 SherwoodRouter interface (`contracts/SherwoodRouter.sol`)
+
+One entry point: `swap(SwapParams p) payable returns (uint256 amountOut)`.
+
+```
+struct SwapParams {
+  uint8   venue;        // 0 = Uniswap V2, 1 = Uniswap V3
+  address tokenIn;      // 0x0 = native ETH
+  address tokenOut;     // 0x0 = native ETH
+  uint256 amountIn;     // for ETH in, msg.value must equal amountIn
+  uint256 minAmountOut; // slippage floor, net of the router fee
+  address[] v2Path;     // V2: [tokenIn|WETH, ..., tokenOut|WETH]
+  bytes   v3Path;       // V3: abi.encodePacked(token, uint24 fee, token, ...)
+  address recipient;
+  uint256 deadline;     // unix seconds
+  address referrer;     // Merry Men attribution (0x0 if none)
+}
+```
+
+**Read:** `feeBps()` (default 10 = 0.10%, hard cap 30) · `quoteFee(amountIn) → (fee, netAmountIn)` · `paused()` · `treasury()`.
+**Event:** `SherwoodSwap(user, referrer, venue, tokenIn, tokenOut, amountIn, amountOut, feeAmount, recipient)`. The referral indexer reads this.
+
+**How the frontend picks the route ("multi-prong"):**
+1. `quoteFee(amountIn)` → `net`.
+2. Quote `net` on each venue in parallel:
+   - V2: `getAmountsOut(net, path)` on the V2 router (deduct WOOD's 3% tax if WOOD is in the path)
+   - V3: `quoteExactInput(path, net)` on the V3 Quoter `0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7`, trying the 0.05%, 0.3% and 1% tiers
+3. Use the best output and set `minAmountOut = best × (1 − slippage)`.
+4. The user approves SherwoodRouter for `tokenIn` (ERC-20 only), then calls `swap`.
+
+Example from the fork, 0.5 ETH → USDG: V3 0.05% = 1,238.60 · V3 0.3% = 1,233.66 · V2 = 1,226.06. Picking the best route beats V2 alone by about 1%.
+
+**Notes:** route WOOD through **V2** (its pool and tax live there). Do **not** make SherwoodRouter limit-exempt in WoodToken, or buys through it would skip the max-tx limit. V4 venue: planned for router v2 (via Universal Router).
 
 ## 3. $WOOD Tokenomics
 
@@ -197,6 +231,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 5. **Tax token caveats:** taxes apply only to AMM-pair trades. Trades through other venues (e.g. a V3/V4 pool) aren't taxed unless registered with `setAmmPair`. Plan: `removeLimits()` after launch settles; use a multisig owner.
 6. **Secrets:** never commit `.env`, private keys or tokens. The chat's deploy script put the GitHub token in the git remote URL; don't do that.
 7. Still needed: **treasury wallet address**, **owner multisig** (recommend Safe), and **Seed Sale numbers** (Section 3).
+9. **Brand caution:** the UI uses "Robinhood Quest Board", "Robinhood Wallet (Featured) — Native 0% Fee Integration" and "Robinhood DEX". These could read as an official Robinhood partnership. Use "on Robinhood Chain" phrasing and avoid claims of integrations that don't exist.
 8. **EIP-7702 warning:** the public Hardhat test keys have sweeper delegations on Robinhood Chain. Never fund or use them on a live network.
 
 ## 7. Milestones
@@ -210,7 +245,9 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [ ] SherwoodSeedSale contract (after sale numbers are decided)
 - [ ] Fork-test a single-sided V3 launch with WOOD's tax (fallback Path B)
 - [ ] Pre-launch quests + referral pre-registration (off-chain OK for v0)
-- [ ] **v1 contracts (cont.):** SherwoodRouter (fee) → FriarTuckVault → MerryMenReferral → tests → testnet (46630) → audit
+- [x] SherwoodRouter.sol (V2 + V3 venues, 0.10% fee) + 11 tests + mainnet-fork test
+- [ ] **v1 contracts (cont.):** FriarTuckVault → MerryMenReferral → testnet (46630) → audit
+- [ ] Router v2: add Uniswap V4 venue
 - [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
 - [ ] **v3:** Launchpad, sponsored quests
 - [ ] Frontend scaffold (Next.js + Wagmi, chain 4663)
