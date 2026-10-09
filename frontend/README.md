@@ -27,7 +27,9 @@ One-time setup in the Cloudflare dashboard → **Workers & Pages** → **Create*
 - **Root directory:** `frontend`
 - **Build command:** `npm ci --legacy-peer-deps && npm run build`
 - **Deploy command:** `npx wrangler deploy`
-- Then Worker → **Settings → Domains & Routes → Add → Custom domain** → `tradewood.app` (and `www.tradewood.app`).
+- Custom domains `tradewood.app` + `www.tradewood.app` are declared in `wrangler.jsonc` (`routes` with `custom_domain: true`).
+
+**Status: set up 2026-10-09. Live at https://tradewood.app.**
 
 After that, every merge to `main` deploys automatically. Manual deploy: `npm run build && npx wrangler deploy` (needs `wrangler login`).
 
