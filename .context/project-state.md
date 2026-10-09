@@ -39,9 +39,46 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 
 **Revenue streams:** swap fee 0.30% (0.25% LPs / 0.05% treasury) · WOOD trade tax · 10% vault performance fee · 2–5% early-unbond penalty · flash loans 0.09% · launchpad/listing fees · sponsored quests.
 
-**Fee tiers (by staked WOOD):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.20% · Outlaw 10,000 → 0.10% · Merry Man 50,000+ → 0% + rebates.
+**Fee tiers (by staked WOOD, proposed):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.25% · Outlaw 10,000 → 0.20% · Merry Man 50,000+ → 0.10% + WOOD rebates. (Original chat: 0.30 / 0.20 / 0.10 / 0%.) Discounts come out of the LP + treasury split proportionally.
 
-**Referrals:** chat says 15–20% of invitee fees, plus a 10% discount for 30 days for new users. UI docs say 5% tier 1 / 2% tier 2. **Needs a decision.**
+### Merry Men Referral Program (PROPOSED v1 — 2026-10-08)
+
+Design rule: **cash rewards come only from the treasury's cut, on referred volume only, and the treasury always keeps ≥70%.** Excitement comes from a **fixed $WOOD budget** carved from the Guild fund, so the program can never overspend.
+
+**Swap fee split (proposed change):** 0.30% total = **0.24% LPs / 0.06% treasury** (was 0.25 / 0.05).
+
+**A. Cash share (ETH/USDC, paid from the treasury's 0.06%)**
+
+| Phase | Epochs (14 days each) | Tier 1 (direct) | Tier 2 | Treasury keeps |
+|---|---|---|---|---|
+| Founding Outlaws | 1–6 (~84 days) | 25% | 5% | 70% |
+| Growth | 7–13 (~98 days) | 20% | 5% | 75% |
+| Steady | 14+ | 15% | 3% | 82% |
+
+Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut. Rate changes go through a 48h timelock. Founding referrers keep Founding rates on the wallets they already referred for 12 months.
+
+**B. $WOOD bonus (from the Guild fund, fixed budget)**
+
+- Referral budget: **6,000,000 WOOD** (40% of the 15M Merry Men Guild & Ecosystem Fund). The other 9M stays for quests and ecosystem.
+- Fixed pool per epoch, split pro-rata by each referrer's referred volume:
+  - Founding (epochs 1–6): **400,000 WOOD/epoch** → 2.4M
+  - Growth (epochs 7–13): **200,000 WOOD/epoch** → 1.4M
+  - Steady (epochs 14–52): **~56,400 WOOD/epoch** → 2.2M (program ends at ~2 years unless renewed)
+- One wallet can take at most **5% of an epoch pool**.
+- Claimed WOOD auto-stakes in Friar Tuck's Treasury for 14 days, which limits dumping and grows TVL.
+
+**C. New-user welcome (instead of a fee discount)**
+
+- For the first 30 days, referred users get **10% of their swap fees back in WOOD**, paid from the 6M referral budget. Their fee stays 0.30%, so LP and treasury income is unchanged.
+
+**D. Anti-abuse**
+
+- No self-referral. A referral binding is permanent once set.
+- A swap must be worth at least **$10** to count. Rewards only start after the referred wallet reaches **$50 cumulative volume**.
+
+**Worked example:** at $1M/month of referred volume, fees are $3,000. Treasury cut = $600, Founding cash payout = $180, treasury net = $420. All WOOD rewards come from the pre-set allocation, so no cash leaves.
+
+**Related fix:** the "Merry Man" tier (0% swap fee + 100% rebates) would wipe out revenue from the most active traders. Proposed: Merry Man = **0.10%** fee, with rebates paid in WOOD from the quests budget.
 
 ## 4. Network & Contract Parameters
 
@@ -70,7 +107,7 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 4. **Own DEX vs. existing DEX:** a full AMM, vaults and flash loans is a large audit surface. Option: launch WOOD on an existing Robinhood Chain DEX first and build Tradewood's own router later.
 5. **Tax token caveats:** transfer taxes and max-wallet limits break many aggregators, vaults and CEX listings, and look like a honeypot to scanners. Need exemptions and owner-renounce/limits-off plans.
 6. **Secrets:** never commit `.env`, private keys or tokens. The chat's deploy script put the GitHub token in the git remote URL; don't do that.
-7. Referral % (Section 3), treasury wallet address, initial liquidity amount.
+7. Approve the referral program v1 and fee tiers (Section 3). Still needed: treasury wallet address and initial liquidity amount.
 
 ## 7. Milestones
 
