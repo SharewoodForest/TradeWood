@@ -275,6 +275,6 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [ ] **v3:** Launchpad, sponsored quests
 - [x] Frontend v0 (Next.js + wagmi, chain 4663): layout, live multi-venue swap UI, placeholder pages (branch `frontend/app`)
 - [x] WalletConnect project ID set (`frontend/.env.production`); restrict domains to tradewood.app in the Reown dashboard
-- [x] **Live: https://tradewood.app** (+ www, + tradewood.tec5upor1.workers.dev). Cloudflare Worker `tradewood` (static assets), auto-deploys from `main` via Workers Builds (repo SharewoodForest/TradeWood, root `frontend`). Custom domains are set in `frontend/wrangler.jsonc`.
+- [x] **Live: https://tradewood.app** (+ www; the workers.dev address turns off automatically once custom domains are set). Cloudflare Worker `tradewood` (static assets), auto-deploys from `main` via Workers Builds (repo SharewoodForest/TradeWood, root `frontend`). Custom domains are set in `frontend/wrangler.jsonc`.
 - [ ] Cloudflare Pages + tradewood.app DNS
 - [ ] Mainnet launch
