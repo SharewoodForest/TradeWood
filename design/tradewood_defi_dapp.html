@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeWood.app | The Sherwood Protocol on Robinhood Chain</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#050807',
+            forestDark: '#0B120E',
+            panelBg: '#111A14',
+            panelCard: '#18241D',
+            panelHover: '#203027',
+            emeraldGlow: '#10B981',
+            neonGreen: '#00E676',
+            sherwoodGold: '#F59E0B',
+            goldLight: '#FCD34D',
+            robinRed: '#FF3B30',
+            borderSubtle: 'rgba(16, 185, 129, 0.15)',
+            borderActive: 'rgba(0, 230, 118, 0.4)',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+            mono: ['Space Grotesk', 'monospace'],
+          },
+          boxShadow: {
+            'emerald-glow': '0 0 20px rgba(16, 185, 129, 0.25)',
+            'gold-glow': '0 0 20px rgba(245, 158, 11, 0.3)',
+            'neon-lg': '0 0 30px rgba(0, 230, 118, 0.4)',
+            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.45)',
+          },
+          animation: {
+            'pulse-slow': 'pulseGlow 3s infinite ease-in-out',
+            'float': 'float 4s ease-in-out infinite',
+            'shimmer': 'shimmer 2.5s linear infinite',
+            'marquee': 'marquee 25s linear infinite',
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' },
+              '50%': { boxShadow: '0 0 30px rgba(0, 230, 118, 0.55)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            },
+            marquee: {
+              '0%': { transform: 'translateX(0%)' },
+              '100%': { transform: 'translateX(-50%)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050807;
+      color: #ECFDF5;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(5, 8, 7, 0.95) 0%, #050807 100%);
+      background-attachment: fixed;
+    }
+    
+    .glass-card {
+      background: rgba(17, 26, 20, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(16, 185, 129, 0.18);
+    }
+
+    .glass-card-gold {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(17, 26, 20, 0.85) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .glass-card-glow {
+      background: linear-gradient(135deg, rgba(17, 26, 20, 0.95) 0%, rgba(6, 38, 22, 0.7) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 230, 118, 0.35);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #FFFFFF 0%, #00E676 60%, #10B981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-gold-text {
+      background: linear-gradient(135deg, #FFFBEB 0%, #FCD34D 50%, #F59E0B 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cyber-border-glow {
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.2);
+      transition: all 0.3s ease;
+    }
+    .cyber-border-glow:hover {
+      box-shadow: 0 0 25px rgba(0, 230, 118, 0.4);
+      border-color: rgba(0, 230, 118, 0.6);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050807;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #18241D;
+      border-radius: 9999px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10B981;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-neonGreen selection:text-black">
+
+  <!-- Top Live Marquee Banner -->
+  <div class="bg-forestDark/90 border-b border-emeraldGlow/20 py-2 px-4 text-xs font-mono overflow-hidden whitespace-nowrap z-50">
+    <div class="flex items-center gap-8 animate-marquee">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-neonGreen animate-ping"></span>
+        <span class="text-slate-400">NETWORK:</span>
+        <span class="text-white font-bold">Robinhood Chain Mainnet (ID: 7777)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">$WOOD PRICE:</span>
+        <span class="text-neonGreen font-bold" id="ticker-wood-price">$0.0482</span>
+        <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-arrow-trend-up"></i> +18.4%</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">PROTOCOL TVL:</span>
+        <span class="text-goldLight font-bold">$18,450,200</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">TOTAL BURNED:</span>
+        <span class="text-robinRed font-bold"><i class="fa-solid fa-fire"></i> 18,420,000 $WOOD</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">GAS SAVED ON RH CHAIN:</span>
+        <span class="text-emeraldGlow font-bold">$420,500+</span>
+      </div>
+      <!-- Repeat for infinite marquee effect -->
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-neonGreen animate-ping"></span>
+        <span class="text-slate-400">SHERWOOD ROUTER:</span>
+        <span class="text-white font-bold">0% Gas Fee Engine Active</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">$WOOD PRICE:</span>
+        <span class="text-neonGreen font-bold">$0.0482</span>
+        <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-arrow-trend-up"></i> +18.4%</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">PROTOCOL TVL:</span>
+        <span class="text-goldLight font-bold">$18,450,200</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header Navigation -->
+  <header class="sticky top-0 z-40 glass-card border-b border-emeraldGlow/20 px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group shrink-0">
+        <div class="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-neonGreen via-emeraldGlow to-forestDark p-0.5 shadow-emerald-glow group-hover:scale-105 transition-all duration-300">
+          <div class="w-full h-full bg-obsidian rounded-[14px] flex items-center justify-center">
+            <i class="fa-solid fa-tree text-neonGreen text-xl group-hover:rotate-12 transition-transform"></i>
+          </div>
+          <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-sherwoodGold rounded-full border-2 border-obsidian flex items-center justify-center text-[8px] text-black font-extrabold"><i class="fa-solid fa-feather"></i></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-display font-black text-2xl tracking-tight text-white">trade<span class="text-neonGreen">wood</span></span>
+            <span class="text-[10px] font-mono font-bold bg-emeraldGlow/15 text-neonGreen px-1.5 py-0.5 rounded border border-emeraldGlow/30 uppercase">.app</span>
+          </div>
+          <p class="text-[10px] text-slate-400 font-medium tracking-wider uppercase font-mono">The Sherwood Protocol</p>
+        </div>
+      </a>
+
+      <!-- Navigation Tabs (Desktop) -->
+      <nav class="hidden lg:flex items-center gap-1 bg-panelBg/90 p-1.5 rounded-2xl border border-emeraldGlow/20">
+        <button onclick="switchTab('swap')" id="nav-swap" class="nav-btn active px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 text-neonGreen bg-emeraldGlow/15 border border-emeraldGlow/30 shadow-sm">
+          <i class="fa-solid fa-arrow-right-arrow-left"></i> Exchange
+        </button>
+        <button onclick="switchTab('vaults')" id="nav-vaults" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-vault"></i> Yield Vaults
+        </button>
+        <button onclick="switchTab('merrymen')" id="nav-merrymen" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-users text-sherwoodGold"></i> Merry Men
+        </button>
+        <button onclick="switchTab('quests')" id="nav-quests" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-scroll text-amber-400"></i> Quests
+        </button>
+        <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-chart-line"></i> Analytics
+        </button>
+        <button onclick="openModal('docs-modal')" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-book-open"></i> Docs
+        </button>
+      </nav>
+
+      <!-- Network Badge & Wallet Action -->
+      <div class="flex items-center gap-3">
+        <!-- Robinhood Network Pill -->
+        <div class="hidden sm:flex items-center gap-2 bg-emerald-950/80 border border-emeraldGlow/40 px-3 py-1.5 rounded-xl text-xs font-mono text-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-neonGreen animate-ping"></span>
+          <i class="fa-solid fa-feather text-sherwoodGold text-xs"></i>
+          <span>Robinhood Chain</span>
+        </div>
+
+        <!-- Connect Wallet Button / HUD Trigger -->
+        <button id="connect-wallet-btn" onclick="handleWalletButtonClick()" class="relative group bg-gradient-to-r from-neonGreen via-emeraldGlow to-sherwoodGold text-black font-extrabold px-4 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition-all duration-300 shadow-emerald-glow hover:shadow-neon-lg active:scale-95 flex items-center gap-2">
+          <i class="fa-solid fa-wallet text-black"></i>
+          <span id="wallet-btn-text">Connect Wallet</span>
+        </button>
+
+        <!-- Mobile Drawer Toggle -->
+        <button onclick="toggleMobileNav()" class="lg:hidden p-2.5 rounded-xl bg-panelCard border border-emeraldGlow/20 text-slate-200">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Drawer Navigation -->
+    <div id="mobile-nav" class="hidden lg:hidden pt-4 pb-2 border-t border-emeraldGlow/10 mt-3 grid grid-cols-2 gap-2">
+      <button onclick="switchTab('swap')" class="p-3 rounded-xl bg-panelCard border border-emeraldGlow/10 text-left text-xs font-bold font-mono flex items-center gap-2 text-white">
+        <i class="fa-solid fa-arrow-right-arrow-left text-neonGreen"></i> Exchange
+      </button>
+      <button onclick="switchTab('vaults')" class="p-3 rounded-xl bg-panelCard border border-emeraldGlow/10 text-left text-xs font-bold font-mono flex items-center gap-2 text-white">
+        <i class="fa-solid fa-vault text-neonGreen"></i> Yield Vaults
+      </button>
+      <button onclick="switchTab('merrymen')" class="p-3 rounded-xl bg-panelCard border border-emeraldGlow/10 text-left text-xs font-bold font-mono flex items-center gap-2 text-white">
+        <i class="fa-solid fa-users text-sherwoodGold"></i> Merry Men
+      </button>
+      <button onclick="switchTab('quests')" class="p-3 rounded-xl bg-panelCard border border-emeraldGlow/10 text-left text-xs font-bold font-mono flex items-center gap-2 text-white">
+        <i class="fa-solid fa-scroll text-amber-400"></i> Quests
+      </button>
+      <button onclick="switchTab('analytics')" class="p-3 rounded-xl bg-panelCard border border-emeraldGlow/10 text-left text-xs font-bold font-mono flex items-center gap-2 text-white">
+        <i class="fa-solid fa-chart-line text-neonGreen"></i> Analytics
+      </button>
+      <button onclick="openModal('docs-modal')" class="p-3 rounded-xl bg-panelCard border border-emeraldGlow/10 text-left text-xs font-bold font-mono flex items-center gap-2 text-white">
+        <i class="fa-solid fa-book-open text-blue-400"></i> Whitepaper
+      </button>
+    </div>
+  </header>
+
+  <!-- Connected Wallet HUD Banner (Shows when connected) -->
+  <div id="wallet-hud-banner" class="hidden bg-gradient-to-r from-emerald-950/90 via-panelBg to-forestDark border-b border-emeraldGlow/30 py-2.5 px-4 lg:px-8">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <div class="flex items-center gap-3">
+        <span class="text-slate-400">ACCOUNT:</span>
+        <span class="text-neonGreen font-bold bg-emeraldGlow/10 px-2 py-0.5 rounded border border-emeraldGlow/30" id="hud-address">0x71C...492F</span>
+        <span class="text-slate-400">| PROVIDER:</span>
+        <span class="text-goldLight font-bold" id="hud-provider">Robinhood Wallet</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <div>
+          <span class="text-slate-400">$WOOD BAL:</span>
+          <span class="text-white font-bold ml-1" id="hud-wood-bal">12,500.00 $WOOD</span>
+        </div>
+        <div>
+          <span class="text-slate-400">STAKED:</span>
+          <span class="text-neonGreen font-bold ml-1" id="hud-staked-bal">10,000.00 $WOOD</span>
+        </div>
+        <div>
+          <span class="text-slate-400">UNCLAIMED YIELD:</span>
+          <span class="text-sherwoodGold font-bold ml-1" id="hud-yield-bal">142.85 $WOOD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 py-8 w-full flex-grow">
+    
+    <!-- ========================================== -->
+    <!-- TAB 1: DEX SWAP ("THE FOREST EXCHANGE")   -->
+    <!-- ========================================== -->
+    <div id="tab-swap" class="tab-content block space-y-8">
+      
+      <!-- Swap Sub-header -->
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <span class="bg-emeraldGlow/10 text-neonGreen border border-emeraldGlow/30 text-[11px] font-mono px-3 py-1 rounded-full uppercase tracking-wider font-bold inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved"></i> Robinhood Chain Native DEX
+        </span>
+        <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-white">The Forest Exchange</h1>
+        <p class="text-slate-400 text-xs sm:text-sm">Trade $WOOD, $RH, $rOKX, USDC and ETH with 0% Protocol Fees and Instant Settlement.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Swap Interaction Card -->
+        <div class="lg:col-span-5 mx-auto w-full max-w-md lg:max-w-none">
+          <div class="glass-card-glow rounded-3xl p-6 shadow-2xl relative border border-emeraldGlow/30">
+            
+            <!-- Card Header -->
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-neonGreen animate-ping"></span>
+                <h2 class="font-display text-lg font-bold text-white">Swap Tokens</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="openModal('slippage-modal')" class="w-8 h-8 rounded-xl bg-panelCard hover:bg-panelHover border border-emeraldGlow/20 text-slate-300 flex items-center justify-center transition-colors" title="Slippage Settings">
+                  <i class="fa-solid fa-sliders text-xs"></i>
+                </button>
+                <button onclick="refreshSwapRates()" class="w-8 h-8 rounded-xl bg-panelCard hover:bg-panelHover border border-emeraldGlow/20 text-slate-300 flex items-center justify-center transition-colors" title="Refresh Rates">
+                  <i class="fa-solid fa-arrows-rotate text-xs" id="refresh-icon"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Pay Input Box -->
+            <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/15 hover:border-emeraldGlow/40 transition-all">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-slate-400 font-medium">You Pay</span>
+                <span class="text-xs text-slate-400">Balance: <span class="font-mono text-white" id="pay-balance">1,250.00</span></span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <input type="number" id="pay-amount" placeholder="0.0" value="100" oninput="calculateSwap()" class="w-full bg-transparent text-2xl font-mono font-bold text-white outline-none placeholder:text-slate-600">
+                <button onclick="openTokenSelector('pay')" id="pay-token-btn" class="flex items-center gap-2 bg-panelBg border border-emeraldGlow/25 hover:border-emeraldGlow/50 px-3 py-2 rounded-xl transition-all shrink-0">
+                  <div class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs" id="pay-icon-box">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                  </div>
+                  <span class="font-bold text-sm text-white font-mono" id="pay-symbol">USDC</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                </button>
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-xs font-mono text-slate-400" id="pay-usd">~$100.00</span>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="setSwapFraction(0.25)" class="text-[10px] font-mono font-bold bg-white/5 hover:bg-neonGreen/20 hover:text-neonGreen px-2 py-0.5 rounded transition-colors text-slate-400">25%</button>
+                  <button onclick="setSwapFraction(0.50)" class="text-[10px] font-mono font-bold bg-white/5 hover:bg-neonGreen/20 hover:text-neonGreen px-2 py-0.5 rounded transition-colors text-slate-400">50%</button>
+                  <button onclick="setSwapFraction(1.0)" class="text-[10px] font-mono font-bold bg-emeraldGlow/20 text-neonGreen px-2 py-0.5 rounded transition-colors">MAX</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flip Button -->
+            <div class="relative my-2 flex justify-center">
+              <button onclick="flipSwapTokens()" class="w-10 h-10 rounded-xl bg-panelBg border border-emeraldGlow/30 hover:border-neonGreen text-neonGreen flex items-center justify-center shadow-lg hover:scale-110 active:rotate-180 transition-all duration-300 z-10">
+                <i class="fa-solid fa-arrow-down-up text-xs"></i>
+              </button>
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-emeraldGlow/10"></div>
+              </div>
+            </div>
+
+            <!-- Receive Input Box -->
+            <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/15 hover:border-emeraldGlow/40 transition-all">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-slate-400 font-medium">You Receive</span>
+                <span class="text-xs text-slate-400">Balance: <span class="font-mono text-white" id="receive-balance">12,500.00</span></span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <input type="number" id="receive-amount" readonly placeholder="0.0" value="2074.68" class="w-full bg-transparent text-2xl font-mono font-bold text-neonGreen outline-none">
+                <button onclick="openTokenSelector('receive')" id="receive-token-btn" class="flex items-center gap-2 bg-panelBg border border-emeraldGlow/25 hover:border-emeraldGlow/50 px-3 py-2 rounded-xl transition-all shrink-0">
+                  <div class="w-6 h-6 rounded-full bg-neonGreen/20 text-neonGreen flex items-center justify-center font-bold text-xs" id="receive-icon-box">
+                    <i class="fa-solid fa-tree"></i>
+                  </div>
+                  <span class="font-bold text-sm text-white font-mono" id="receive-symbol">WOOD</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                </button>
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-xs font-mono text-slate-400" id="receive-usd">~$99.80 (-0.20%)</span>
+                <span class="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                  <i class="fa-solid fa-shield-halved"></i> Sherwood Router v2
+                </span>
+              </div>
+            </div>
+
+            <!-- Route Breakdown -->
+            <div class="mt-4 p-3.5 rounded-xl bg-panelBg/80 border border-emeraldGlow/10 text-xs space-y-2 font-mono">
+              <div class="flex justify-between text-slate-400">
+                <span>Rate</span>
+                <span class="text-white" id="exchange-rate-text">1 USDC = 20.7468 $WOOD</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Network Fee</span>
+                <span class="text-neonGreen font-semibold">0.00 $RH Gas (Free)</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Price Impact</span>
+                <span class="text-emerald-400">&lt; 0.01%</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Slippage Tolerance</span>
+                <span class="text-white" id="current-slippage-display">0.5%</span>
+              </div>
+            </div>
+
+            <!-- Primary Action Button -->
+            <button id="swap-action-btn" onclick="executeSwap()" class="w-full mt-5 bg-gradient-to-r from-neonGreen via-emeraldGlow to-sherwoodGold text-black font-extrabold py-4 rounded-2xl text-sm font-mono uppercase tracking-wider shadow-neon-lg hover:shadow-gold-glow active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bolt text-black"></i>
+              <span id="swap-btn-label">Execute Sherwood Swap</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chart & Live Orderbook Panel -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="glass-card rounded-3xl p-6 border border-emeraldGlow/20">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <div class="flex items-center gap-3">
+                  <h3 class="text-lg font-bold font-display text-white">$WOOD / USDC</h3>
+                  <span class="bg-emeraldGlow/10 text-neonGreen text-xs px-2.5 py-0.5 rounded-full border border-emeraldGlow/30 font-mono font-semibold">Robinhood DEX</span>
+                </div>
+                <div class="flex items-baseline gap-3 mt-1">
+                  <span class="text-3xl font-bold font-mono text-white">$0.04820</span>
+                  <span class="text-neonGreen text-xs font-mono font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-trend-up"></i> +18.4% (24h)
+                  </span>
+                </div>
+              </div>
+
+              <!-- Timeframe Selectors -->
+              <div class="flex items-center gap-1 bg-panelBg p-1 rounded-xl border border-emeraldGlow/20 text-xs font-mono">
+                <button onclick="updateChartTimeframe('1H')" class="tf-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white">1H</button>
+                <button onclick="updateChartTimeframe('24H')" class="tf-btn active px-3 py-1 rounded-lg bg-emeraldGlow/20 text-neonGreen font-bold border border-emeraldGlow/40">24H</button>
+                <button onclick="updateChartTimeframe('7D')" class="tf-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white">7D</button>
+                <button onclick="updateChartTimeframe('1M')" class="tf-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white">1M</button>
+              </div>
+            </div>
+
+            <!-- Chart Canvas -->
+            <div class="relative w-full h-[280px]">
+              <canvas id="swapPriceChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Protocol Live Stream -->
+          <div class="glass-card rounded-3xl p-5 border border-emeraldGlow/20">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-display font-bold text-sm text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-neonGreen animate-ping"></span>
+                Sherwood Protocol Real-time Stream
+              </h4>
+              <span class="text-[10px] font-mono text-slate-400">Robinhood Block #18,492,012</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs font-mono">
+                <thead class="text-slate-400 border-b border-emeraldGlow/10 uppercase text-[10px]">
+                  <tr>
+                    <th class="pb-2">Action</th>
+                    <th class="pb-2">Amount</th>
+                    <th class="pb-2">Wallet</th>
+                    <th class="pb-2 text-right">Time</th>
+                  </tr>
+                </thead>
+                <tbody id="swap-feed-body" class="divide-y divide-emeraldGlow/5">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: YIELD VAULTS ("REDISTRIBUTE YIELD") -->
+    <!-- ========================================== -->
+    <div id="tab-vaults" class="tab-content hidden space-y-8">
+      
+      <!-- Vault Hero Banner -->
+      <div class="glass-card-glow rounded-3xl p-6 lg:p-8 relative overflow-hidden border border-emeraldGlow/30">
+        <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-neonGreen/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div class="space-y-2">
+            <span class="inline-flex items-center gap-2 bg-emeraldGlow/10 border border-emeraldGlow/30 text-neonGreen text-xs px-3 py-1 rounded-full font-mono uppercase">
+              <i class="fa-solid fa-seedling"></i> Sherwood Staking & Yield Strategy Engine
+            </span>
+            <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+              Redistribute Yield to the Hood
+            </h2>
+            <p class="text-slate-300 max-w-xl text-xs sm:text-sm">
+              Stake $WOOD or LP tokens into automated auto-compounding strategies. Non-custodial, high yield, protected by Robinhood Chain's instant state finality.
+            </p>
+          </div>
+
+          <!-- Staking Summary Box -->
+          <div class="bg-panelCard border border-emeraldGlow/30 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-6 shrink-0">
+            <div>
+              <span class="text-xs text-slate-400 block font-mono">Total Staked Value</span>
+              <span class="text-2xl font-mono font-bold text-white">$13,680,400</span>
+            </div>
+            <div class="sm:border-l sm:border-emeraldGlow/20 sm:pl-6">
+              <span class="text-xs text-slate-400 block font-mono">Real-time Unclaimed Yield</span>
+              <span class="text-2xl font-mono font-bold text-sherwoodGold" id="live-vault-rewards">142.8590 $WOOD</span>
+            </div>
+            <button onclick="harvestAllYield()" class="w-full sm:w-auto bg-gradient-to-r from-sherwoodGold to-goldLight text-black font-extrabold px-5 py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all shadow-gold-glow active:scale-95">
+              Harvest All Yield
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vault Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Vault 1: Friar Tuck's Treasury -->
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between hover:border-emeraldGlow/50 transition-all group border border-emeraldGlow/20">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-emeraldGlow/15 border border-emeraldGlow/30 text-neonGreen flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-tree"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold font-display text-lg text-white">Friar Tuck's Treasury</h3>
+                  <span class="text-xs text-slate-400 font-mono">Single-Asset $WOOD</span>
+                </div>
+              </div>
+              <span class="bg-emeraldGlow/20 text-neonGreen text-xs font-mono font-extrabold px-3 py-1 rounded-full border border-emeraldGlow/40">
+                88.4% APY
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">Zero lockup period. Pure $WOOD yield derived from 0.25% protocol exchange fee redistribution.</p>
+
+            <div class="space-y-2.5 my-4 text-xs font-mono bg-panelCard p-4 rounded-2xl border border-emeraldGlow/10">
+              <div class="flex justify-between text-slate-400">
+                <span>Your Staked Position</span>
+                <span class="text-white font-bold" id="v1-staked-text">10,000 $WOOD</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Pending Yield</span>
+                <span class="text-neonGreen font-bold" id="v1-yield-text">84.20 $WOOD</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Vault Security</span>
+                <span class="text-emerald-400"><i class="fa-solid fa-shield text-[10px]"></i> Audited (RH Engine)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <button onclick="openStakeModal('Friar Tuck\'s Treasury', 88.4, 'WOOD', 10000)" class="bg-neonGreen hover:bg-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all shadow-emerald-glow">
+              Deposit
+            </button>
+            <button onclick="openUnstakeModal('Friar Tuck\'s Treasury')" class="bg-panelBg hover:bg-panelHover border border-emeraldGlow/20 text-slate-200 font-bold py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all">
+              Withdraw
+            </button>
+          </div>
+        </div>
+
+        <!-- Vault 2: Little John's LP Vault -->
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between hover:border-emeraldGlow/50 transition-all group border border-emeraldGlow/20">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="flex -space-x-3 overflow-hidden">
+                  <div class="w-10 h-10 rounded-2xl bg-emeraldGlow/20 text-neonGreen border border-emeraldGlow/30 flex items-center justify-center font-bold text-sm"><i class="fa-solid fa-tree"></i></div>
+                  <div class="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-sm"><i class="fa-brands fa-ethereum"></i></div>
+                </div>
+                <div>
+                  <h3 class="font-bold font-display text-lg text-white">Little John's LP Vault</h3>
+                  <span class="text-xs text-slate-400 font-mono">$WOOD / ETH LP</span>
+                </div>
+              </div>
+              <span class="bg-emeraldGlow/20 text-neonGreen text-xs font-mono font-extrabold px-3 py-1 rounded-full border border-emeraldGlow/40">
+                214.2% APY
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">Provide $WOOD / ETH liquidity on Robinhood DEX and harvest boosted compound yields.</p>
+
+            <div class="space-y-2.5 my-4 text-xs font-mono bg-panelCard p-4 rounded-2xl border border-emeraldGlow/10">
+              <div class="flex justify-between text-slate-400">
+                <span>Your Staked Position</span>
+                <span class="text-white font-bold" id="v2-staked-text">1.24 LP</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Pending Yield</span>
+                <span class="text-neonGreen font-bold" id="v2-yield-text">42.15 $WOOD</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Multiplier</span>
+                <span class="text-sherwoodGold font-bold">8.5x Boost</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <button onclick="openStakeModal('Little John\'s LP Vault', 214.2, 'WOOD-ETH LP', 1.24)" class="bg-neonGreen hover:bg-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all shadow-emerald-glow">
+              Deposit LP
+            </button>
+            <button onclick="openUnstakeModal('Little John\'s LP Vault')" class="bg-panelBg hover:bg-panelHover border border-emeraldGlow/20 text-slate-200 font-bold py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all">
+              Withdraw
+            </button>
+          </div>
+        </div>
+
+        <!-- Vault 3: Outlaw Auto-Compounder -->
+        <div class="glass-card-gold rounded-3xl p-6 flex flex-col justify-between hover:border-sherwoodGold/60 transition-all group border border-sherwoodGold/30 relative">
+          <div class="absolute -top-3 right-6 bg-sherwoodGold text-black text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-gold-glow">
+            <i class="fa-solid fa-crown"></i> Outlaw Tier
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="flex -space-x-3 overflow-hidden">
+                  <div class="w-10 h-10 rounded-2xl bg-emeraldGlow/20 text-neonGreen border border-emeraldGlow/30 flex items-center justify-center font-bold text-sm"><i class="fa-solid fa-tree"></i></div>
+                  <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-sm"><i class="fa-solid fa-coins"></i></div>
+                </div>
+                <div>
+                  <h3 class="font-bold font-display text-lg text-white">Outlaw Auto-Compounder</h3>
+                  <span class="text-xs text-slate-400 font-mono">$WOOD / $rOKX Staking</span>
+                </div>
+              </div>
+              <span class="bg-sherwoodGold/20 text-goldLight text-xs font-mono font-extrabold px-3 py-1 rounded-full border border-sherwoodGold/40">
+                340.5% APY
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">Maximized dual-token compound strategy automatically reinvesting every 10 minutes.</p>
+
+            <div class="space-y-2.5 my-4 text-xs font-mono bg-panelCard p-4 rounded-2xl border border-sherwoodGold/20">
+              <div class="flex justify-between text-slate-400">
+                <span>Your Staked Position</span>
+                <span class="text-white font-bold" id="v3-staked-text">0.00 LP</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Pending Yield</span>
+                <span class="text-goldLight font-bold" id="v3-yield-text">16.50 $WOOD</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Multiplier</span>
+                <span class="text-goldLight font-bold">15.0x Max Boost</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <button onclick="openStakeModal('Outlaw Auto-Compounder', 340.5, 'WOOD-rOKX LP', 0.00)" class="bg-gradient-to-r from-sherwoodGold to-goldLight text-black font-extrabold py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all shadow-gold-glow">
+              Deposit
+            </button>
+            <button onclick="openUnstakeModal('Outlaw Auto-Compounder')" class="bg-panelBg hover:bg-panelHover border border-sherwoodGold/20 text-slate-200 font-bold py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all">
+              Withdraw
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: MERRY MEN REFERRALS (GUILD SYSTEM)  -->
+    <!-- ========================================== -->
+    <div id="tab-merrymen" class="tab-content hidden space-y-8">
+      
+      <!-- Referral Hero Header -->
+      <div class="glass-card-gold rounded-3xl p-6 lg:p-8 relative overflow-hidden border border-sherwoodGold/30">
+        <div class="max-w-3xl space-y-3">
+          <span class="bg-sherwoodGold/20 text-goldLight border border-sherwoodGold/40 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider inline-flex items-center gap-1.5">
+            <i class="fa-solid fa-users text-sherwoodGold"></i> The Merry Men Outlaw Network
+          </span>
+          <h2 class="font-display text-3xl font-extrabold text-white">
+            Recruit Outlaws to <span class="gradient-gold-text">tradewood.app</span>
+          </h2>
+          <p class="text-slate-300 text-xs sm:text-sm">
+            Earn a perpetual multi-tiered yield share from every swap and vault deposit made by your recruited outlaws on Robinhood Chain.
+          </p>
+
+          <!-- Copy Link Component -->
+          <div class="pt-2">
+            <label class="text-xs font-mono text-slate-400 mb-1.5 block">Your Unique Sherwood Referral Link</label>
+            <div class="flex items-center gap-2 max-w-xl">
+              <input type="text" id="referral-link-input" readonly value="https://tradewood.app/?ref=0x71C492F" class="w-full bg-panelBg border border-sherwoodGold/30 rounded-xl px-4 py-3 text-xs font-mono text-goldLight font-bold outline-none">
+              <button onclick="copyReferralLink()" class="bg-gradient-to-r from-sherwoodGold to-goldLight text-black font-extrabold px-5 py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all shadow-gold-glow shrink-0 flex items-center gap-2">
+                <i class="fa-solid fa-copy"></i> Copy Link
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Commission Stats & Leaderboard Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Stats Panel -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-card p-6 rounded-3xl border border-emeraldGlow/20 space-y-4">
+            <h3 class="font-display font-bold text-lg text-white">Your Guild Overview</h3>
+            
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/10">
+                <span class="text-[10px] text-slate-400 font-mono block">Recruiting Tier</span>
+                <span class="text-lg font-mono font-bold text-neonGreen">Tier 1 Outlaw</span>
+              </div>
+              <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/10">
+                <span class="text-[10px] text-slate-400 font-mono block">Outlaws Recruited</span>
+                <span class="text-lg font-mono font-bold text-white">18 Members</span>
+              </div>
+              <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/10">
+                <span class="text-[10px] text-slate-400 font-mono block">Tier 1 Commission</span>
+                <span class="text-lg font-mono font-bold text-goldLight">5.0% Yield Share</span>
+              </div>
+              <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/10">
+                <span class="text-[10px] text-slate-400 font-mono block">Tier 2 Commission</span>
+                <span class="text-lg font-mono font-bold text-emerald-400">2.0% Yield Share</span>
+              </div>
+            </div>
+
+            <div class="bg-panelBg p-4 rounded-2xl border border-sherwoodGold/30 flex items-center justify-between">
+              <div>
+                <span class="text-xs font-mono text-slate-400 block">Claimable Referral Rewards</span>
+                <span class="text-xl font-mono font-bold text-goldLight">284.50 $WOOD</span>
+              </div>
+              <button onclick="claimReferralRewards()" class="bg-gradient-to-r from-sherwoodGold to-goldLight text-black font-extrabold px-4 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition-all shadow-gold-glow">
+                Claim Rewards
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outlaw Leaderboard -->
+        <div class="lg:col-span-7">
+          <div class="glass-card p-6 rounded-3xl border border-emeraldGlow/20">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-display font-bold text-lg text-white flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-sherwoodGold"></i> Top Outlaw Recruiters
+              </h3>
+              <span class="text-xs font-mono text-slate-400">Updated Real-Time</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs font-mono">
+                <thead class="text-slate-400 border-b border-emeraldGlow/10 uppercase text-[10px]">
+                  <tr>
+                    <th class="pb-3">Rank</th>
+                    <th class="pb-3">Outlaw Leader</th>
+                    <th class="pb-3">Recruits</th>
+                    <th class="pb-3 text-right">Volume Driven</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-emeraldGlow/5 font-medium">
+                  <tr class="hover:bg-panelCard/50 transition-colors">
+                    <td class="py-3 text-sherwoodGold font-bold">#1</td>
+                    <td class="py-3 text-white">0x8f2...92a1 (LittleJohn_Vault)</td>
+                    <td class="py-3 text-neonGreen">142</td>
+                    <td class="py-3 text-right text-goldLight">$1,240,500</td>
+                  </tr>
+                  <tr class="hover:bg-panelCard/50 transition-colors">
+                    <td class="py-3 text-slate-300 font-bold">#2</td>
+                    <td class="py-3 text-white">0x3d1...84c9 (Friar_Staker)</td>
+                    <td class="py-3 text-neonGreen">98</td>
+                    <td class="py-3 text-right text-goldLight">$890,120</td>
+                  </tr>
+                  <tr class="hover:bg-panelCard/50 transition-colors">
+                    <td class="py-3 text-amber-600 font-bold">#3</td>
+                    <td class="py-3 text-white">0x99c...10bf (Will_Scarlet)</td>
+                    <td class="py-3 text-neonGreen">64</td>
+                    <td class="py-3 text-right text-goldLight">$512,400</td>
+                  </tr>
+                  <tr class="hover:bg-panelCard/50 transition-colors">
+                    <td class="py-3 text-slate-400">#4</td>
+                    <td class="py-3 text-neonGreen font-bold">0x71C...492F (YOU)</td>
+                    <td class="py-3 text-neonGreen">18</td>
+                    <td class="py-3 text-right text-goldLight">$142,800</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: ROBINHOOD QUESTS & BOUNTY BOARD    -->
+    <!-- ========================================== -->
+    <div id="tab-quests" class="tab-content hidden space-y-8">
+      
+      <!-- Quests Hero Header -->
+      <div class="glass-card-glow rounded-3xl p-6 lg:p-8 border border-emeraldGlow/30 relative">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs px-3 py-1 rounded-full font-mono uppercase tracking-wider font-bold mb-2 inline-block">
+              <i class="fa-solid fa-scroll"></i> Daily Robinhood Bounties
+            </span>
+            <h2 class="font-display text-3xl font-extrabold text-white">Robinhood Quest Board</h2>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1">Complete daily DeFi tasks on Robinhood Chain to claim bonus $WOOD token rewards.</p>
+          </div>
+
+          <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/20 shrink-0 text-right">
+            <span class="text-xs font-mono text-slate-400 block">Daily Quests Completed</span>
+            <span class="text-2xl font-mono font-bold text-neonGreen" id="quest-completion-count">2 / 4 Completed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quest Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Quest 1 -->
+        <div class="glass-card p-6 rounded-3xl border border-emeraldGlow/20 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono font-bold text-neonGreen bg-emeraldGlow/10 px-2.5 py-1 rounded-lg border border-emeraldGlow/20">
+                <i class="fa-solid fa-arrow-right-arrow-left"></i> Swap Task
+              </span>
+              <span class="text-xs font-mono text-goldLight font-bold">+100 $WOOD</span>
+            </div>
+            <h3 class="font-display font-bold text-base text-white">Robin Hood's First Swap</h3>
+            <p class="text-xs text-slate-400 mt-1">Execute a swap of at least $50 value on The Forest Exchange.</p>
+
+            <div class="w-full bg-panelCard h-2 rounded-full mt-4 overflow-hidden border border-emeraldGlow/10">
+              <div class="bg-neonGreen h-full w-full"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-5 pt-3 border-t border-emeraldGlow/10">
+            <span class="text-xs font-mono text-emerald-400"><i class="fa-solid fa-circle-check"></i> Completed</span>
+            <button disabled class="bg-panelCard text-slate-500 font-extrabold px-4 py-2 rounded-xl text-xs font-mono opacity-60">
+              Claimed
+            </button>
+          </div>
+        </div>
+
+        <!-- Quest 2 -->
+        <div class="glass-card p-6 rounded-3xl border border-emeraldGlow/20 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                <i class="fa-solid fa-vault"></i> Staking Task
+              </span>
+              <span class="text-xs font-mono text-goldLight font-bold">+250 $WOOD</span>
+            </div>
+            <h3 class="font-display font-bold text-base text-white">Friar Tuck's Blessing</h3>
+            <p class="text-xs text-slate-400 mt-1">Stake any amount of $WOOD into Friar Tuck's Treasury Vault.</p>
+
+            <div class="w-full bg-panelCard h-2 rounded-full mt-4 overflow-hidden border border-emeraldGlow/10">
+              <div class="bg-neonGreen h-full w-full"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-5 pt-3 border-t border-emeraldGlow/10">
+            <span class="text-xs font-mono text-neonGreen"><i class="fa-solid fa-circle-exclamation"></i> Ready to Claim!</span>
+            <button id="quest-2-btn" onclick="claimQuestReward('quest-2-btn', 250)" class="bg-gradient-to-r from-sherwoodGold to-goldLight text-black font-extrabold px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shadow-gold-glow">
+              Claim 250 $WOOD
+            </button>
+          </div>
+        </div>
+
+        <!-- Quest 3 -->
+        <div class="glass-card p-6 rounded-3xl border border-emeraldGlow/20 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-500/20">
+                <i class="fa-solid fa-users"></i> Referral Task
+              </span>
+              <span class="text-xs font-mono text-goldLight font-bold">+500 $WOOD</span>
+            </div>
+            <h3 class="font-display font-bold text-base text-white">Recruit an Outlaw</h3>
+            <p class="text-xs text-slate-400 mt-1">Invite 1 friend using your Merry Men referral link.</p>
+
+            <div class="w-full bg-panelCard h-2 rounded-full mt-4 overflow-hidden border border-emeraldGlow/10">
+              <div class="bg-neonGreen h-full w-1/2"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-5 pt-3 border-t border-emeraldGlow/10">
+            <span class="text-xs font-mono text-slate-400">Progress: 0 / 1 Outlaw</span>
+            <button onclick="switchTab('merrymen')" class="bg-panelBg hover:bg-panelHover border border-emeraldGlow/20 text-neonGreen font-bold px-4 py-2 rounded-xl text-xs font-mono">
+              Get Link
+            </button>
+          </div>
+        </div>
+
+        <!-- Quest 4 -->
+        <div class="glass-card p-6 rounded-3xl border border-emeraldGlow/20 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20">
+                <i class="fa-solid fa-droplet"></i> Liquidity Task
+              </span>
+              <span class="text-xs font-mono text-goldLight font-bold">+1,000 $WOOD</span>
+            </div>
+            <h3 class="font-display font-bold text-base text-white">Sherwood Treasury Supporter</h3>
+            <p class="text-xs text-slate-400 mt-1">Deposit liquidity into any $WOOD LP Vault.</p>
+
+            <div class="w-full bg-panelCard h-2 rounded-full mt-4 overflow-hidden border border-emeraldGlow/10">
+              <div class="bg-neonGreen h-full w-0"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-5 pt-3 border-t border-emeraldGlow/10">
+            <span class="text-xs font-mono text-slate-400">Progress: 0 / 1 LP Deposit</span>
+            <button onclick="switchTab('vaults')" class="bg-panelBg hover:bg-panelHover border border-emeraldGlow/20 text-neonGreen font-bold px-4 py-2 rounded-xl text-xs font-mono">
+              Go to Vaults
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: PROTOCOL ANALYTICS & TOKENOMICS     -->
+    <!-- ========================================== -->
+    <div id="tab-analytics" class="tab-content hidden space-y-8">
+      
+      <!-- Core Analytics Metrics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl border border-emeraldGlow/20">
+          <span class="text-xs font-mono text-slate-400 block mb-1">Total Value Locked (TVL)</span>
+          <span class="text-2xl font-mono font-bold text-white">$18,450,200</span>
+          <span class="text-[10px] font-mono text-neonGreen block mt-1"><i class="fa-solid fa-caret-up"></i> +24.8% this month</span>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl border border-emeraldGlow/20">
+          <span class="text-xs font-mono text-slate-400 block mb-1">Total $WOOD Burned</span>
+          <span class="text-2xl font-mono font-bold text-robinRed">18,420,000 $WOOD</span>
+          <span class="text-[10px] font-mono text-slate-400 block mt-1">18.4% of Total Supply</span>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl border border-emeraldGlow/20">
+          <span class="text-xs font-mono text-slate-400 block mb-1">$WOOD Staking Ratio</span>
+          <span class="text-2xl font-mono font-bold text-sherwoodGold">74.2% Staked</span>
+          <span class="text-[10px] font-mono text-emerald-400 block mt-1">High Supply Lockup</span>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl border border-emeraldGlow/20">
+          <span class="text-xs font-mono text-slate-400 block mb-1">Gas Saved on Robinhood</span>
+          <span class="text-2xl font-mono font-bold text-neonGreen">$420,500+</span>
+          <span class="text-[10px] font-mono text-slate-400 block mt-1">0% RH Gas Engine</span>
+        </div>
+      </div>
+
+      <!-- Tokenomics Distribution Panel -->
+      <div class="glass-card p-6 rounded-3xl border border-emeraldGlow/20 space-y-6">
+        <h3 class="font-display font-bold text-lg text-white">$WOOD Tokenomics Architecture</h3>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">Community Yield & Staking Vaults</span>
+                <span class="text-neonGreen font-bold">50% (50,000,000 $WOOD)</span>
+              </div>
+              <div class="w-full bg-panelCard h-3 rounded-full overflow-hidden">
+                <div class="bg-neonGreen h-full w-[50%]"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">Robinhood DEX Liquidity Pool</span>
+                <span class="text-sherwoodGold font-bold">25% (25,000,000 $WOOD)</span>
+              </div>
+              <div class="w-full bg-panelCard h-3 rounded-full overflow-hidden">
+                <div class="bg-sherwoodGold h-full w-[25%]"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">Merry Men Guild & Ecosystem Fund</span>
+                <span class="text-blue-400 font-bold">15% (15,000,000 $WOOD)</span>
+              </div>
+              <div class="w-full bg-panelCard h-3 rounded-full overflow-hidden">
+                <div class="bg-blue-400 h-full w-[15%]"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">Deflationary Auto-Burn Engine</span>
+                <span class="text-robinRed font-bold">10% (10,000,000 $WOOD)</span>
+              </div>
+              <div class="w-full bg-panelCard h-3 rounded-full overflow-hidden">
+                <div class="bg-robinRed h-full w-[10%]"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Highlight Box -->
+          <div class="bg-panelCard p-6 rounded-2xl border border-emeraldGlow/20 space-y-3 font-mono text-xs">
+            <h4 class="font-display font-bold text-sm text-neonGreen uppercase">Sherwood Burn Mechanism</h4>
+            <p class="text-slate-300 leading-relaxed">
+              Every swap executed on <strong class="text-white">tradewood.app</strong> applies a 0.1% buy-back and burn fee on $WOOD. To date, over 18.4M $WOOD tokens have been permanently incinerated on Robinhood Chain!
+            </p>
+            <div class="p-3 bg-panelBg rounded-xl border border-emeraldGlow/10 flex justify-between items-center text-slate-400">
+              <span>Robinhood Chain Burn Contract:</span>
+              <span class="text-neonGreen font-bold">0x000...WOOD_BURN</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-emeraldGlow/20 bg-forestDark/80 py-8 px-4 lg:px-8 mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-neonGreen/20 text-neonGreen flex items-center justify-center font-bold text-sm border border-emeraldGlow/30">
+          <i class="fa-solid fa-tree"></i>
+        </div>
+        <div>
+          <span class="font-display font-bold text-base text-white">trade<span class="text-neonGreen">wood</span>.app</span>
+          <p class="text-[11px] text-slate-400">The Sherwood Protocol on Robinhood Chain</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6 text-xs font-mono text-slate-400">
+        <a href="#swap" onclick="switchTab('swap')" class="hover:text-neonGreen transition-colors">Exchange</a>
+        <a href="#vaults" onclick="switchTab('vaults')" class="hover:text-neonGreen transition-colors">Vaults</a>
+        <a href="#merrymen" onclick="switchTab('merrymen')" class="hover:text-sherwoodGold transition-colors">Merry Men</a>
+        <a href="#quests" onclick="switchTab('quests')" class="hover:text-amber-400 transition-colors">Quests</a>
+        <a href="#analytics" onclick="switchTab('analytics')" class="hover:text-neonGreen transition-colors">Analytics</a>
+      </div>
+
+      <div class="flex items-center gap-4 text-slate-400 text-base">
+        <a href="https://twitter.com" target="_blank" rel="noopener" class="hover:text-neonGreen transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="https://discord.com" target="_blank" rel="noopener" class="hover:text-neonGreen transition-colors"><i class="fa-brands fa-discord"></i></a>
+        <a href="https://telegram.org" target="_blank" rel="noopener" class="hover:text-neonGreen transition-colors"><i class="fa-brands fa-telegram"></i></a>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- MODAL 1: CONNECT WALLET -->
+  <div id="wallet-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 border border-emeraldGlow/30 relative">
+      
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-display text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-wallet text-neonGreen"></i> Connect Wallet
+        </h3>
+        <button onclick="closeModal('wallet-modal')" class="w-8 h-8 rounded-full bg-panelCard hover:bg-panelHover text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <!-- Robinhood Wallet (Featured) -->
+        <button onclick="simulateWalletConnect('Robinhood Wallet')" class="w-full bg-gradient-to-r from-emerald-950 to-panelBg border-2 border-emeraldGlow hover:border-neonGreen p-4 rounded-2xl flex items-center justify-between group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-neonGreen/20 text-neonGreen flex items-center justify-center text-lg">
+              <i class="fa-solid fa-feather"></i>
+            </div>
+            <div class="text-left">
+              <span class="font-bold text-sm text-white font-mono block">Robinhood Wallet</span>
+              <span class="text-[10px] text-neonGreen font-mono">Native 0% Fee Integration</span>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-neonGreen group-hover:translate-x-1 transition-transform"></i>
+        </button>
+
+        <!-- MetaMask -->
+        <button onclick="simulateWalletConnect('MetaMask')" class="w-full bg-panelCard hover:bg-panelHover border border-emeraldGlow/20 p-4 rounded-2xl flex items-center justify-between group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-mask"></i>
+            </div>
+            <span class="font-bold text-sm text-white font-mono">MetaMask</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:translate-x-1 transition-transform"></i>
+        </button>
+
+        <!-- WalletConnect -->
+        <button onclick="simulateWalletConnect('WalletConnect')" class="w-full bg-panelCard hover:bg-panelHover border border-emeraldGlow/20 p-4 rounded-2xl flex items-center justify-between group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <span class="font-bold text-sm text-white font-mono">WalletConnect</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:translate-x-1 transition-transform"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL 2: TOKEN SELECTOR -->
+  <div id="token-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 border border-emeraldGlow/30 relative">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display text-lg font-bold text-white">Select Token</h3>
+        <button onclick="closeModal('token-modal')" class="w-8 h-8 rounded-full bg-panelCard hover:bg-panelHover text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="relative mb-4">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+        <input type="text" id="token-search" oninput="filterTokenList()" placeholder="Search token name or symbol..." class="w-full bg-panelBg border border-emeraldGlow/20 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none focus:border-neonGreen">
+      </div>
+
+      <div class="space-y-2 max-h-64 overflow-y-auto pr-1" id="token-list-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: SLIPPAGE SETTINGS -->
+  <div id="slippage-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-sm rounded-3xl p-6 border border-emeraldGlow/30 relative">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display text-lg font-bold text-white">Slippage Settings</h3>
+        <button onclick="closeModal('slippage-modal')" class="w-8 h-8 rounded-full bg-panelCard hover:bg-panelHover text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 font-mono text-xs">
+        <div>
+          <label class="text-slate-400 block mb-2">Max Slippage Tolerance</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button onclick="setSlippage(0.1)" class="slip-btn p-2 rounded-xl bg-panelCard border border-emeraldGlow/20 text-slate-300 font-bold">0.1%</button>
+            <button onclick="setSlippage(0.5)" class="slip-btn active p-2 rounded-xl bg-emeraldGlow/20 border border-emeraldGlow text-neonGreen font-bold">0.5%</button>
+            <button onclick="setSlippage(1.0)" class="slip-btn p-2 rounded-xl bg-panelCard border border-emeraldGlow/20 text-slate-300 font-bold">1.0%</button>
+            <input type="number" id="custom-slippage-input" placeholder="Custom" oninput="setCustomSlippage(this.value)" class="bg-panelBg border border-emeraldGlow/20 rounded-xl p-2 text-center text-white outline-none">
+          </div>
+        </div>
+
+        <button onclick="closeModal('slippage-modal')" class="w-full bg-neonGreen hover:bg-emerald-400 text-black font-extrabold py-3 rounded-xl uppercase tracking-wider">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: STAKE / DEPOSIT -->
+  <div id="stake-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 border border-emeraldGlow/30 relative">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-display text-lg font-bold text-white" id="stake-modal-title">Deposit LP</h3>
+          <span class="text-xs text-neonGreen font-mono font-bold" id="stake-modal-apy">214.2% APY</span>
+        </div>
+        <button onclick="closeModal('stake-modal')" class="w-8 h-8 rounded-full bg-panelCard hover:bg-panelHover text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-panelCard p-4 rounded-2xl border border-emeraldGlow/20">
+          <div class="flex justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>Amount to Deposit</span>
+            <span>Available: <span class="text-white" id="stake-modal-avail">12,500.00</span></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="number" id="stake-modal-input" value="1000" class="w-full bg-transparent text-xl font-mono font-bold text-white outline-none">
+            <button onclick="document.getElementById('stake-modal-input').value = state.modalMaxAvail" class="bg-emeraldGlow/20 text-neonGreen text-xs font-mono px-2 py-1 rounded font-bold">MAX</button>
+          </div>
+        </div>
+
+        <button onclick="confirmDepositVault()" class="w-full bg-neonGreen hover:bg-emerald-400 text-black font-extrabold py-3.5 rounded-xl text-xs font-mono uppercase tracking-wider shadow-emerald-glow">
+          Confirm Deposit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: PROTOCOL DOCS & WHITEPAPER -->
+  <div id="docs-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-2xl rounded-3xl p-6 lg:p-8 border border-emeraldGlow/30 relative max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-book-open text-neonGreen text-xl"></i>
+          <h3 class="font-display text-xl font-bold text-white">The Sherwood Whitepaper Overview</h3>
+        </div>
+        <button onclick="closeModal('docs-modal')" class="w-8 h-8 rounded-full bg-panelCard hover:bg-panelHover text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono text-slate-300 leading-relaxed">
+        <p><strong class="text-neonGreen">TradeWood.app</strong> is the primary DEX and Yield Protocol native to Robinhood Chain (Chain ID: 7777). Built on the principles of zero-friction execution, instant state finality, and yield redistribution to community holders.</p>
+        
+        <h4 class="text-white font-bold text-sm pt-2 border-t border-emeraldGlow/10">1. Zero Gas Routing</h4>
+        <p>By leveraging Robinhood Chain's specialized gas-relayer engine, $WOOD transactions feature 0% protocol gas fees, allowing instant micro-swaps and micro-yield compounding.</p>
+
+        <h4 class="text-white font-bold text-sm pt-2 border-t border-emeraldGlow/10">2. Deflationary $WOOD Mechanics</h4>
+        <p>A constant 0.1% fee on every exchange swap goes toward buying back $WOOD from open liquidity and immediately incinerating it in the Robinhood burn vault.</p>
+
+        <h4 class="text-white font-bold text-sm pt-2 border-t border-emeraldGlow/10">3. Merry Men Yield Referral Program</h4>
+        <p>Holders can recruit outlaws to earn a perpetual 5.0% Tier 1 and 2.0% Tier 2 commission on all trading fees generated by their network.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-3 pointer-events-none"></div>
+
+  <script>
+    // Global Application State
+    const state = {
+      walletConnected: false,
+      walletAddress: '0x71C492F89a',
+      walletName: 'Robinhood Wallet',
+      currentSlippage: 0.5,
+      activeTokenTarget: 'pay',
+      tokens: {
+        WOOD: { name: 'TradeWood Token', symbol: 'WOOD', price: 0.04820, balance: 12500.00, icon: 'fa-tree', color: 'text-neonGreen', bg: 'bg-neonGreen/20' },
+        USDC: { name: 'USD Coin', symbol: 'USDC', price: 1.0000, balance: 1250.00, icon: 'fa-dollar-sign', color: 'text-blue-400', bg: 'bg-blue-500/20' },
+        RH: { name: 'Robinhood Token', symbol: 'RH', price: 18.50, balance: 45.00, icon: 'fa-feather', color: 'text-goldLight', bg: 'bg-amber-500/20' },
+        rOKX: { name: 'Wrapped OKX Token', symbol: 'rOKX', price: 42.10, balance: 12.00, icon: 'fa-coins', color: 'text-purple-400', bg: 'bg-purple-500/20' },
+        ETH: { name: 'Ethereum', symbol: 'ETH', price: 3450.00, balance: 0.85, icon: 'fa-ethereum', color: 'text-indigo-400', bg: 'bg-indigo-500/20' }
+      },
+      selectedPayToken: 'USDC',
+      selectedReceiveToken: 'WOOD',
+      unclaimedVaultYield: 142.8590,
+      modalMaxAvail: 1000,
+      chartInstance: null
+    };
+
+    // Navigation Switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-neonGreen', 'bg-emeraldGlow/15', 'border', 'border-emeraldGlow/30', 'shadow-sm');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeBtn = document.getElementById(`nav-${tabId}`);
+      if(activeBtn) {
+        activeBtn.classList.add('text-neonGreen', 'bg-emeraldGlow/15', 'border', 'border-emeraldGlow/30', 'shadow-sm');
+        activeBtn.classList.remove('text-slate-400');
+      }
+
+      if(tabId === 'swap' && !state.chartInstance) {
+        initPriceChart();
+      }
+    }
+
+    // Dynamic Swap Calculations
+    function calculateSwap() {
+      const payInput = parseFloat(document.getElementById('pay-amount').value) || 0;
+      const payTok = state.tokens[state.selectedPayToken];
+      const recTok = state.tokens[state.selectedReceiveToken];
+
+      const totalPayUSD = payInput * payTok.price;
+      const totalRecAmt = totalPayUSD / recTok.price;
+
+      document.getElementById('receive-amount').value = totalRecAmt.toFixed(4);
+      document.getElementById('pay-usd').innerText = `~$${totalPayUSD.toFixed(2)}`;
+      document.getElementById('receive-usd').innerText = `~$${(totalPayUSD * 0.998).toFixed(2)} (-0.20%)`;
+
+      const rate = (payTok.price / recTok.price).toFixed(4);
+      document.getElementById('exchange-rate-text').innerText = `1 ${payTok.symbol} = ${rate} ${recTok.symbol}`;
+    }
+
+    function setSwapFraction(fraction) {
+      const payTok = state.tokens[state.selectedPayToken];
+      const amt = payTok.balance * fraction;
+      document.getElementById('pay-amount').value = amt.toFixed(2);
+      calculateSwap();
+    }
+
+    function flipSwapTokens() {
+      const temp = state.selectedPayToken;
+      state.selectedPayToken = state.selectedReceiveToken;
+      state.selectedReceiveToken = temp;
+
+      updateTokenUI();
+      calculateSwap();
+    }
+
+    function updateTokenUI() {
+      const payTok = state.tokens[state.selectedPayToken];
+      const recTok = state.tokens[state.selectedReceiveToken];
+
+      document.getElementById('pay-symbol').innerText = payTok.symbol;
+      document.getElementById('pay-balance').innerText = payTok.balance.toLocaleString();
+      document.getElementById('pay-icon-box').innerHTML = `<i class="fa-solid ${payTok.icon}"></i>`;
+      document.getElementById('pay-icon-box').className = `w-6 h-6 rounded-full ${payTok.bg} ${payTok.color} flex items-center justify-center font-bold text-xs`;
+
+      document.getElementById('receive-symbol').innerText = recTok.symbol;
+      document.getElementById('receive-balance').innerText = recTok.balance.toLocaleString();
+      document.getElementById('receive-icon-box').innerHTML = `<i class="fa-solid ${recTok.icon}"></i>`;
+      document.getElementById('receive-icon-box').className = `w-6 h-6 rounded-full ${recTok.bg} ${recTok.color} flex items-center justify-center font-bold text-xs`;
+    }
+
+    // Modal Control
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Token Selector Modal Logic
+    function openTokenSelector(target) {
+      state.activeTokenTarget = target;
+      renderTokenList();
+      openModal('token-modal');
+    }
+
+    function renderTokenList(filter = '') {
+      const container = document.getElementById('token-list-container');
+      container.innerHTML = '';
+
+      Object.keys(state.tokens).forEach(sym => {
+        const tok = state.tokens[sym];
+        if (filter && !tok.symbol.toLowerCase().includes(filter) && !tok.name.toLowerCase().includes(filter)) return;
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-3 rounded-2xl bg-panelCard hover:bg-panelHover cursor-pointer border border-emeraldGlow/10 transition-all';
+        row.onclick = () => {
+          if (state.activeTokenTarget === 'pay') state.selectedPayToken = sym;
+          else state.selectedReceiveToken = sym;
+          updateTokenUI();
+          calculateSwap();
+          closeModal('token-modal');
+        };
+
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full ${tok.bg} ${tok.color} flex items-center justify-center font-bold text-xs">
+              <i class="fa-solid ${tok.icon}"></i>
+            </div>
+            <div>
+              <span class="font-bold text-xs text-white font-mono block">${tok.symbol}</span>
+              <span class="text-[10px] text-slate-400">${tok.name}</span>
+            </div>
+          </div>
+          <div class="text-right font-mono">
+            <span class="text-xs font-bold text-white block">${tok.balance.toLocaleString()}</span>
+            <span class="text-[10px] text-slate-400">$${tok.price.toFixed(2)}</span>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function filterTokenList() {
+      const query = document.getElementById('token-search').value.toLowerCase();
+      renderTokenList(query);
+    }
+
+    // Wallet Connection simulation
+    function handleWalletButtonClick() {
+      if (!state.walletConnected) {
+        openModal('wallet-modal');
+      } else {
+        showToast('Wallet HUD Active on Header', 'info');
+      }
+    }
+
+    function simulateWalletConnect(providerName) {
+      state.walletConnected = true;
+      state.walletName = providerName;
+
+      document.getElementById('wallet-btn-text').innerText = '0x71C...492F';
+      document.getElementById('wallet-hud-banner').classList.remove('hidden');
+
+      closeModal('wallet-modal');
+      showToast(`Connected to ${providerName} on Robinhood Chain!`, 'success');
+      triggerConfetti();
+    }
+
+    // Swap Execution
+    function executeSwap() {
+      if(!state.walletConnected) {
+        openModal('wallet-modal');
+        return;
+      }
+
+      const btn = document.getElementById('swap-action-btn');
+      const label = document.getElementById('swap-btn-label');
+
+      btn.disabled = true;
+      label.innerText = 'Approving Robinhood Router...';
+
+      setTimeout(() => {
+        label.innerText = 'Routing via Sherwood Engine...';
+        setTimeout(() => {
+          btn.disabled = false;
+          label.innerText = 'Execute Sherwood Swap';
+          
+          showToast('Swap Confirmed! 0.00 RH Gas Charged', 'success');
+          triggerConfetti();
+
+          // Add to live feed
+          const payVal = document.getElementById('pay-amount').value;
+          addFeedItem('Swap', `$${payVal}`, state.walletAddress);
+        }, 1200);
+      }, 1000);
+    }
+
+    // Slippage Settings
+    function setSlippage(val) {
+      state.currentSlippage = val;
+      document.getElementById('current-slippage-display').innerText = `${val}%`;
+      showToast(`Slippage set to ${val}%`, 'info');
+    }
+
+    // Vault Staking
+    function openStakeModal(title, apy, tokenSym, maxAvail) {
+      document.getElementById('stake-modal-title').innerText = `Deposit into ${title}`;
+      document.getElementById('stake-modal-apy').innerText = `${apy}% APY`;
+      document.getElementById('stake-modal-avail').innerText = `${maxAvail.toLocaleString()} ${tokenSym}`;
+      state.modalMaxAvail = maxAvail;
+      openModal('stake-modal');
+    }
+
+    function openUnstakeModal(title) {
+      showToast(`Withdraw request submitted for ${title}`, 'info');
+    }
+
+    function confirmDepositVault() {
+      closeModal('stake-modal');
+      showToast('Successfully staked into Sherwood Vault!', 'success');
+      triggerConfetti();
+    }
+
+    function harvestAllYield() {
+      showToast(`Harvested ${state.unclaimedVaultYield.toFixed(2)} $WOOD to Wallet!`, 'success');
+      state.unclaimedVaultYield = 0.00;
+      triggerConfetti();
+    }
+
+    function claimReferralRewards() {
+      showToast('Claimed 284.50 $WOOD Referral Rewards!', 'success');
+      triggerConfetti();
+    }
+
+    function claimQuestReward(btnId, rewardAmount) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = true;
+      btn.innerText = 'Claimed';
+      btn.className = 'bg-panelCard text-slate-500 font-extrabold px-4 py-2 rounded-xl text-xs font-mono opacity-60';
+
+      state.tokens.WOOD.balance += rewardAmount;
+      updateTokenUI();
+
+      document.getElementById('quest-completion-count').innerText = '3 / 4 Completed';
+      showToast(`Claimed +${rewardAmount} $WOOD Quest Bounty!`, 'success');
+      triggerConfetti();
+    }
+
+    function copyReferralLink() {
+      const input = document.getElementById('referral-link-input');
+      input.select();
+      document.execCommand('copy');
+      showToast('Referral link copied to clipboard!', 'success');
+    }
+
+    // Chart.js Price Initialization
+    function initPriceChart() {
+      const ctx = document.getElementById('swapPriceChart').getContext('2d');
+      
+      const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+      gradient.addColorStop(0, 'rgba(0, 230, 118, 0.4)');
+      gradient.addColorStop(1, 'rgba(0, 230, 118, 0.0)');
+
+      state.chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+          datasets: [{
+            label: '$WOOD Price ($)',
+            data: [0.0390, 0.0402, 0.0418, 0.0410, 0.0445, 0.0468, 0.04820],
+            borderColor: '#00E676',
+            borderWidth: 3,
+            fill: true,
+            backgroundColor: gradient,
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#00E676',
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              backgroundColor: '#111A14',
+              borderColor: 'rgba(0,230,118,0.3)',
+              borderWidth: 1,
+              titleFont: { family: 'Space Grotesk' },
+              bodyFont: { family: 'Space Grotesk', weight: 'bold' }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#64748B', font: { size: 10 } } },
+            y: { grid: { color: 'rgba(16,185,129,0.08)' }, ticks: { color: '#64748B', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    function updateChartTimeframe(tf) {
+      if(!state.chartInstance) return;
+
+      let newData = [];
+      if(tf === '1H') newData = [0.0478, 0.0479, 0.0481, 0.0480, 0.04820];
+      else if(tf === '24H') newData = [0.0390, 0.0402, 0.0418, 0.0410, 0.0445, 0.0468, 0.04820];
+      else if(tf === '7D') newData = [0.0280, 0.0320, 0.0390, 0.0370, 0.0420, 0.04820];
+      else newData = [0.0120, 0.0210, 0.0310, 0.0390, 0.04820];
+
+      state.chartInstance.data.datasets[0].data = newData;
+      state.chartInstance.update();
+    }
+
+    function addFeedItem(action, val, addr) {
+      const body = document.getElementById('swap-feed-body');
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-panelCard/50 transition-colors animate-pulse';
+
+      row.innerHTML = `
+        <td class="py-2.5 text-neonGreen font-bold flex items-center gap-1.5"><i class="fa-solid fa-bolt text-[10px]"></i> ${action}</td>
+        <td class="py-2.5 text-white font-bold">${val}</td>
+        <td class="py-2.5 text-slate-400 font-mono">${addr}</td>
+        <td class="py-2.5 text-right text-slate-500">Just now</td>
+      `;
+
+      body.insertBefore(row, body.firstChild);
+    }
+
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 60,
+          spread: 70,
+          origin: { y: 0.7 },
+          colors: ['#00E676', '#10B981', '#F59E0B']
+        });
+      }
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'glass-card p-4 rounded-2xl border border-emeraldGlow/40 shadow-neon-lg flex items-center gap-3 text-xs font-mono font-bold text-white pointer-events-auto transition-all transform translate-y-2';
+
+      toast.innerHTML = `
+        <i class="fa-solid fa-circle-check text-neonGreen text-base"></i>
+        <span>${msg}</span>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function toggleMobileNav() {
+      document.getElementById('mobile-nav').classList.toggle('hidden');
+    }
+
+    // Ticking Real-time Yield Generator
+    setInterval(() => {
+      state.unclaimedVaultYield += 0.0025;
+      const el1 = document.getElementById('live-vault-rewards');
+      const el2 = document.getElementById('hud-yield-bal');
+      if (el1) el1.innerText = `${state.unclaimedVaultYield.toFixed(4)} $WOOD`;
+      if (el2) el2.innerText = `${state.unclaimedVaultYield.toFixed(2)} $WOOD`;
+    }, 1000);
+
+    // Initial Load
+    window.onload = function() {
+      updateTokenUI();
+      calculateSwap();
+      initPriceChart();
+
+      // Seed Feed
+      addFeedItem('Swap', '$1,250', '0x8f2...92a1');
+      addFeedItem('Vault Deposit', '$5,000', '0x3d1...84c9');
+      addFeedItem('Swap', '$420', '0x99c...10bf');
+    };
+  </script>
+</body>
+</html>
