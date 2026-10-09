@@ -1,6 +1,12 @@
 # Gemini Kickoff Prompt — TradeWood Frontend
 
-Paste everything below the line into Gemini inside Firebase Studio (formerly Project IDX) after importing the GitHub repo.
+Where to run it: **GitHub Codespaces + Gemini CLI** (cloud workspace, light on a slow laptop). Firebase Studio no longer accepts new workspaces (Google sunset it; it shuts down March 2027).
+Alternative: **Google Antigravity** (desktop app) with the repo cloned locally.
+
+Setup:
+1. github.com/SharewoodForest/TradeWood → **Code** → **Codespaces** → **Create codespace on main**
+2. In the Codespace terminal: `npm install -g @google/gemini-cli` then `gemini`, and sign in with your Gemini Pro Google account
+3. Paste everything below the line into Gemini
 
 ---
 
