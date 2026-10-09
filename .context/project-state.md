@@ -147,7 +147,9 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 | WETH (L2) | `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73` (official docs) · testnet `0x7943e237c7F95DA44E0301572D358911207852Fa` |
 | USDG | `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` (6 decimals, official docs) |
 | Uniswap V2 Factory | `0x8bcEaA40B9AcdfAedF85AdF4FF01F5Ad6517937f` (~103K pairs) |
-| **Uniswap V2 Router02** | `0x89e5db8b5aa49aa85ac63f691524311aeb649eba`, verified on-chain: `factory()` and `WETH()` match, has the fee-on-transfer functions, and passes the mainnet-fork test. Cross-check on Uniswap's deployments page before mainnet. |
+| **Uniswap V2 Router02** | `0x89e5db8b5aa49aa85ac63f691524311aeb649eba`: **official**, listed in Uniswap's SDK (`sdk-core/src/addresses.ts`, `V2_ROUTER_ADDRESSES[ROBINHOOD]`). Also verified on-chain: factory and WETH match, and it passes the mainnet-fork test. |
+| Uniswap V3 Quoter / NonfungiblePositionManager | `0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7` / `0x73991a25c818bf1f1128deaab1492d45638de0d3` |
+| Uniswap V4 Quoter / PositionManager / StateView | `0x8dc178efb8111bb0973dd9d722ebeff267c98f94` / `0x58daec3116aae6d93017baaea7749052e8a04fa7` / `0xf3334192d15450cdd385c8b70e03f9a6bd9e673b` |
 | Uniswap V3 Factory / SwapRouter02 | `0x1f7d7550B1b028f7571E69A784071F0205FD2EfA` / `0xcaf681a66d020601342297493863e78c959e5cb2` |
 | Uniswap V4 PoolManager | `0x8366a39cc670b4001a1121b8f6a443a643e40951` |
 | Permit2 | `0x000000000022D473030F116dDEE9F6B43aC78BA3` |
