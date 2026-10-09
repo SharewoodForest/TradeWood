@@ -22,17 +22,39 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 
 | Contract | Status | Address (4663) | Key functions / events |
 |---|---|---|---|
-| WoodToken ($WOOD) | Draft spec only | — | — |
-| Router / Pair | Not started | — | — |
+| WoodToken ($WOOD) | **Written + tested** (18 unit tests, mainnet-fork buy/sell OK). Not deployed. | — | see 2.1 |
+| WOOD/WETH pair | Created automatically by the WoodToken constructor (Uniswap V2) | — | `mainPair()` |
+| SherwoodSeedSale (early buyers) | Spec only (Section 3) | — | — |
+| SherwoodRouter (fee) | Not started | — | — |
 | Vaults | Not started | — | — |
 | Referral registry | Not started | — | — |
 | Quests / Epoch claims | Not started | — | — |
 
-## 3. $WOOD Tokenomics (as discussed — not final)
+### 2.1 WoodToken interface (`contracts/WoodToken.sol`)
+
+Standard ERC-20 (name `TradeWood`, symbol `WOOD`, 18 decimals) + ERC-2612 `permit` + `burn` / `burnFrom`. Fixed supply 100M; **no mint function**.
+
+**Read (frontend):** `balanceOf`, `totalSupply`, `mainPair()`, `tradingEnabled()`, `limitsInEffect()`, `maxTxAmount()`, `maxWalletAmount()`, `buyLpFeeBps()`, `buyTreasuryFeeBps()`, `sellLpFeeBps()`, `sellTreasuryFeeBps()` (basis points, 100 = 1%), `isFeeExempt(addr)`, `isLimitExempt(addr)`, `isAmmPair(addr)`, `treasury()`.
+
+**Frontend rules:**
+- Swaps of WOOD must use the router's `...SupportingFeeOnTransferTokens` functions, and quotes must deduct the buy/sell tax (default 3%).
+- Max receive per buy = `maxTxAmount` (1M WOOD) while `limitsInEffect`. Wallets are capped at `maxWalletAmount` (2M).
+- Wallet-to-wallet transfers are **untaxed**.
+- Before `tradingEnabled`, only exempt addresses can move WOOD. Show a "Launching soon" state.
+
+**Events:** `TradingEnabled`, `LimitsRemoved`, `FeesUpdated`, `SwapBack(tokensSwapped, tokensAddedToLp, ethAddedToLp, ethToTreasury)`, `TreasuryUpdated`, `AmmPairSet`.
+
+**Known behavior (by design, standard for tax tokens):**
+- Adding or removing liquidity on the WOOD/WETH pair directly also pays the 3% tax, because the pair can't tell an LP add from a sell. Little John's LP Vault will add liquidity as an exempt contract, so vault users avoid this.
+- WOOD sent straight to the token contract (outside the tax) isn't tracked and stays there.
+
+**Owner powers (all bounded):** tax capped at 5%/side · limits can't go below 0.5% tx / 1% wallet · `enableTrading` and `removeLimits` are one-way · can't withdraw accrued WOOD tax · two-step ownership transfer. Vault, sale and referral contracts must be set `isFeeExempt` + `isLimitExempt`.
+
+## 3. $WOOD Tokenomics
 
 - Total supply: **100,000,000 WOOD** (18 decimals)
 - Allocation (UI): 50% community yield & vaults · 25% DEX liquidity · 15% Merry Men guild & ecosystem fund · 10% auto-burn
-- Launch: micro-seed of **$50–$100** ETH/USDC paired with WOOD
+- Launch: **early-buyer sale first** (the $50–$100 micro-seed plan is dropped). See the Seed Sale proposal below.
 - Anti-whale: max tx **1%**, max wallet **2%**
 - Trade tax **3%**: 2% auto-LP (liquidity locked) + 1% treasury
 - Exclusions: owner, token contract, router, treasury
@@ -59,6 +81,20 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 **Illustration only, not a forecast.** At $500K/month routed volume and $100K/month of WOOD trading: router $500 + WOOD tax $1,000 + POL fees (small) ≈ **$1,500/mo**, minus referral cash on referred trades (≤ $150 at Founding rates).
 
 **Fee tiers (by staked WOOD, approved):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.25% · Outlaw 10,000 → 0.20% · Merry Man 50,000+ → 0.10% + WOOD rebates. (Original chat: 0.30 / 0.20 / 0.10 / 0%.) Discounts come out of the LP + treasury split proportionally.
+
+### Sherwood Seed Sale — Early Buyers (PROPOSED — needs numbers)
+
+Goal: raise launch liquidity from early supporters instead of out of pocket, and reward them for coming in first.
+
+- **Allocation:** from the 25M DEX Liquidity allocation, **10M WOOD for the sale** and **15M paired as launch liquidity**.
+- **Price:** fixed sale price, set **below the planned launch price** (e.g. 20–25% discount) so early buyers start in profit when trading opens.
+- **Payment:** ETH or USDG. Per-wallet min/max (e.g. $25–$1,000) so it isn't whaled. Optional whitelist round for "Founding Outlaws" first.
+- **Use of funds (enforced by the contract):** ≥ 70% of the raise is paired with WOOD as liquidity, with LP tokens locked or owned by the treasury. ≤ 30% goes to the treasury (audit, operations).
+- **Buyer protection:** soft cap. If it isn't reached, buyers claim a full refund. Tokens are claimable at launch; optional 50% at launch + 50% over 30 days.
+- **Perks:** sale buyers get Founding Outlaw referral rates automatically and a quest bonus.
+- **Mechanics:** WoodToken already supports this. The sale contract is fee- and limit-exempt and can hand out WOOD before `enableTrading()`.
+- **Needs decisions:** hard cap and soft cap ($), sale price and launch price, per-wallet min/max, whitelist round yes/no, vesting yes/no.
+- **Legal note:** token presales can raise securities and money-transmission questions depending on jurisdiction and marketing. Get legal input before opening the sale to the public.
 
 ### Merry Men Referral Program (APPROVED v1 — 2026-10-08)
 
@@ -108,7 +144,15 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 | Explorer | `robinhoodchain.blockscout.com` |
 | Gas | ETH |
 | Base stablecoin | USDG |
-| DEX router | **Unverified.** Chat used `0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24`; confirm it exists on Robinhood Chain before use. |
+| WETH (L2) | `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73` (official docs) · testnet `0x7943e237c7F95DA44E0301572D358911207852Fa` |
+| USDG | `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` (6 decimals, official docs) |
+| Uniswap V2 Factory | `0x8bcEaA40B9AcdfAedF85AdF4FF01F5Ad6517937f` (~103K pairs) |
+| **Uniswap V2 Router02** | `0x89e5db8b5aa49aa85ac63f691524311aeb649eba`, verified on-chain: `factory()` and `WETH()` match, has the fee-on-transfer functions, and passes the mainnet-fork test. Cross-check on Uniswap's deployments page before mainnet. |
+| Uniswap V3 Factory / SwapRouter02 | `0x1f7d7550B1b028f7571E69A784071F0205FD2EfA` / `0xcaf681a66d020601342297493863e78c959e5cb2` |
+| Uniswap V4 PoolManager | `0x8366a39cc670b4001a1121b8f6a443a643e40951` |
+| Permit2 | `0x000000000022D473030F116dDEE9F6B43aC78BA3` |
+| ⚠️ Do NOT use | `0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24` (from the Gemini chat). It has **no contract on Robinhood Chain**, and every taxed transfer would break. |
+| Testnet RPC | `https://rpc.testnet.chain.robinhood.com` (46630). The testnet Uniswap router address is still unknown. |
 | Tooling | Hardhat + OpenZeppelin v5 (chat) — Foundry also acceptable |
 | Hosting | Cloudflare Pages → tradewood.app; repo `SharewoodForest/TradeWood` |
 
@@ -123,10 +167,11 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 1. ~~Scope conflict~~ — **Resolved 2026-10-08:** gift wrapping was a mix-up with Sharewood Forest. Tradewood = DEX + vaults + referrals + quests.
 2. **UI mock errors to fix:** shows chain ID **7777**, "0% gas / $RH gas", and tokens `$RH`, `$rOKX`. The real chain is 4663 and gas is paid in ETH.
 3. **Chat inconsistencies:** a later reply used RPC `rpc.robinhoodchain.org`, chain ID 1337 and a plain mint/burn token without taxes. Ignore those; use Section 4.
-4. **Own DEX vs. existing DEX:** a full AMM, vaults and flash loans is a large audit surface. Option: launch WOOD on an existing Robinhood Chain DEX first and build Tradewood's own router later.
-5. **Tax token caveats:** transfer taxes and max-wallet limits break many aggregators, vaults and CEX listings, and look like a honeypot to scanners. Need exemptions and owner-renounce/limits-off plans.
+4. ~~Own DEX vs. existing~~ **Decided:** launch WOOD on Uniswap V2 (live on Robinhood Chain); the Sherwood Router fee layer comes next; own AMM pools in v2.
+5. **Tax token caveats:** taxes apply only to AMM-pair trades. Trades through other venues (e.g. a V3/V4 pool) aren't taxed unless registered with `setAmmPair`. Plan: `removeLimits()` after launch settles; use a multisig owner.
 6. **Secrets:** never commit `.env`, private keys or tokens. The chat's deploy script put the GitHub token in the git remote URL; don't do that.
-7. Approve the referral program v1 and fee tiers (Section 3). Still needed: treasury wallet address and initial liquidity amount.
+7. Still needed: **treasury wallet address**, **owner multisig** (recommend Safe), and **Seed Sale numbers** (Section 3).
+8. **EIP-7702 warning:** the public Hardhat test keys have sweeper delegations on Robinhood Chain. Never fund or use them on a live network.
 
 ## 7. Milestones
 
@@ -134,8 +179,10 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [x] Agent skill specs: `.context/claude-skills.md`, `.context/gemini-skills.md`
 - [x] UI mock imported to `design/`
 - [x] Scope: DEX + vaults + referrals + quests; referral v1 + fee tiers approved
-- [ ] Verify live Robinhood Chain DEXs/routers (needed for Sherwood Router)
-- [ ] **v1 contracts:** WoodToken → SherwoodRouter (fee) → FriarTuckVault → MerryMenReferral → tests → testnet (46630) → audit
+- [x] Verified live Robinhood Chain DEX contracts (Section 4)
+- [x] WoodToken.sol + 18 tests + mainnet-fork smoke test
+- [ ] SherwoodSeedSale contract (after sale numbers are decided)
+- [ ] **v1 contracts (cont.):** SherwoodRouter (fee) → FriarTuckVault → MerryMenReferral → tests → testnet (46630) → audit
 - [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
 - [ ] **v3:** Launchpad, sponsored quests
 - [ ] Frontend scaffold (Next.js + Wagmi, chain 4663)
