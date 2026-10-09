@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { ComingSoon, PageHero } from "@/components/PageHero";
-export const metadata: Metadata = { title: "Yield Vaults | TradeWood" };
+export const metadata: Metadata = pageMeta("/vaults/", "Yield Vaults | TradeWood", "Stake $WOOD or provide liquidity in Sherwood vaults that pay from real protocol revenue on Robinhood Chain.");
 
 const VAULTS = [
   { name: "Friar Tuck's Treasury", kind: "Single-asset $WOOD", icon: "fa-tree", tone: "bg-emeraldGlow/15 border-emeraldGlow/30 text-neonGreen",

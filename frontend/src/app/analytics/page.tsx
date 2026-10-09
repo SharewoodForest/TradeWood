@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { PageHero } from "@/components/PageHero";
-export const metadata: Metadata = { title: "Analytics | TradeWood" };
+export const metadata: Metadata = pageMeta("/analytics/", "Analytics | TradeWood", "$WOOD tokenomics, protocol revenue streams and live Sherwood Protocol metrics on Robinhood Chain.");
 
 const ALLOC = [
   { k: "Community Yield & Staking Vaults", pct: 50, color: "bg-neonGreen" },

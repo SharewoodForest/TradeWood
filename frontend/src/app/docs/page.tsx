@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { PageHero } from "@/components/PageHero";
 import { UNISWAP_V2_ROUTER, UNISWAP_V3_QUOTER_V2, USDG, WETH } from "@/config/contracts";
 import { explorerAddress } from "@/config/chains";
-export const metadata: Metadata = { title: "Docs | TradeWood" };
+export const metadata: Metadata = pageMeta("/docs/", "Docs | TradeWood", "How TradeWood works: the Sherwood Router, the $WOOD token, Merry Men referrals, vaults, quests, risks and contract addresses.");
 
 const SECTIONS = [
   { h: "1. Sherwood Router", icon: "fa-route", p: "A swap router that quotes every Uniswap V2 and V3 pool on Robinhood Chain and executes on the best one. It takes a 0.10% protocol fee (hard-capped at 0.30% in the contract), enforces your minimum output after fees, and holds no funds between transactions." },

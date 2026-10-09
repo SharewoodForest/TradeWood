@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { ComingSoon, PageHero } from "@/components/PageHero";
-export const metadata: Metadata = { title: "Quests | TradeWood" };
+export const metadata: Metadata = pageMeta("/quests/", "Quests | TradeWood", "Complete on-chain quests on Robinhood Chain to earn Bounty Points that convert to $WOOD each 14-day epoch.");
 
 const QUESTS = [
   { t: "Robin Hood's First Swap", d: "Make a $50+ swap through the Sherwood Router.", pts: 50, icon: "fa-bolt", tone: "text-neonGreen bg-emeraldGlow/15 border-emeraldGlow/30" },
