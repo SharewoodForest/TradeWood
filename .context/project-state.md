@@ -237,6 +237,14 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - Production stack: Next.js (App Router), TypeScript, Tailwind, Wagmi + Viem, RainbowKit/AppKit (MetaMask, Rabby, Coinbase, Robinhood Wallet & Trust via WalletConnect).
 - Theme tokens from the mock: obsidian `#050807`, panel `#111A14`, neon green `#00E676`, emerald `#10B981`, Sherwood gold `#F59E0B`, robin red `#FF3B30`; fonts Outfit / Inter / Space Grotesk.
 
+### 5.1 Frontend status (2026-10-08, branch `frontend/app`, built by Claude)
+- `frontend/`: Next.js 15 static export, Tailwind (design tokens 1:1 from the mock), wagmi/viem/RainbowKit.
+- **Live now:** network ticker; wallet connect (extensions; mobile via WalletConnect once the project ID is set); balances; **multi-venue quotes** against mainnet (V2 + V3 tiers, direct and via WETH) with best-route pick, Sherwood fee, WOOD tax, price impact and min-received; approve + `SherwoodRouter.swap` (enabled when `NEXT_PUBLIC_SHERWOOD_ROUTER` is set); `?ref=` capture.
+- **Placeholders:** vaults, referral stats/claims, quests, analytics metrics.
+- Design fixes applied: chain 4663 (not 7777), gas paid in ETH, no fake numbers, "on Robinhood Chain" wording, a non-affiliation footer.
+- Verified: build passes, desktop (1440px) and mobile (390px) render with no horizontal scroll, live quotes load in a browser.
+- Gemini: use this as the base for visual polish. Don't restart the scaffold.
+
 ## 6. Open Issues & Decisions Needed
 
 1. ~~Scope conflict~~ — **Resolved 2026-10-08:** gift wrapping was a mix-up with Sharewood Forest. Tradewood = DEX + vaults + referrals + quests.
@@ -265,6 +273,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [ ] Router v2: add Uniswap V4 venue
 - [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
 - [ ] **v3:** Launchpad, sponsored quests
-- [ ] Frontend scaffold (Next.js + Wagmi, chain 4663)
+- [x] Frontend v0 (Next.js + wagmi, chain 4663): layout, live multi-venue swap UI, placeholder pages (branch `frontend/app`)
+- [ ] WalletConnect project ID + Cloudflare Pages deploy
 - [ ] Cloudflare Pages + tradewood.app DNS
 - [ ] Mainnet launch
