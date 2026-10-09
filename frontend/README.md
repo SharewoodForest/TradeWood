@@ -19,11 +19,17 @@ npm run build                 # static site → out/
 | `NEXT_PUBLIC_WOOD_TOKEN` | WoodToken address. Empty → WOOD hidden from the token list. |
 | `NEXT_PUBLIC_RPC_URL` | Optional RPC override |
 
-## Cloudflare Pages
-- Root directory: `frontend`
-- Build command: `npm install --legacy-peer-deps && npm run build`
-- Output directory: `out`
-- Set the env vars above in Pages → Settings → Environment variables, then add custom domain `tradewood.app`.
+## Deploy (Cloudflare Workers, static assets)
+Config: `wrangler.jsonc` (Worker name `tradewood`, serves `out/`).
+
+One-time setup in the Cloudflare dashboard → **Workers & Pages** → **Create** → **Import a repository**:
+- Repository: `SharewoodForest/TradeWood` · Branch: `main`
+- **Root directory:** `frontend`
+- **Build command:** `npm ci --legacy-peer-deps && npm run build`
+- **Deploy command:** `npx wrangler deploy`
+- Then Worker → **Settings → Domains & Routes → Add → Custom domain** → `tradewood.app` (and `www.tradewood.app`).
+
+After that, every merge to `main` deploys automatically. Manual deploy: `npm run build && npx wrangler deploy` (needs `wrangler login`).
 
 ## What's live vs. placeholder
 - **Live:** network ticker (block, gas, ETH price), wallet connect + balances, multi-venue quotes (Uniswap V2 + V3 0.05/0.3/1%, direct and via WETH), price impact, min-received, approve + swap via SherwoodRouter (once its address is set), referral link capture (`?ref=`).

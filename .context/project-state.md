@@ -229,7 +229,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 | ⚠️ Do NOT use | `0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24` (from the Gemini chat). It has **no contract on Robinhood Chain**, and every taxed transfer would break. |
 | Testnet RPC | `https://rpc.testnet.chain.robinhood.com` (46630). The testnet Uniswap router address is still unknown. |
 | Tooling | Hardhat + OpenZeppelin v5 (chat) — Foundry also acceptable |
-| Hosting | Cloudflare Pages → tradewood.app; repo `SharewoodForest/TradeWood` |
+| Hosting | Cloudflare Workers (static assets) → tradewood.app; repo `SharewoodForest/TradeWood`, root `frontend` |
 
 ## 5. Frontend Plan
 
@@ -275,6 +275,6 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [ ] **v3:** Launchpad, sponsored quests
 - [x] Frontend v0 (Next.js + wagmi, chain 4663): layout, live multi-venue swap UI, placeholder pages (branch `frontend/app`)
 - [x] WalletConnect project ID set (`frontend/.env.production`); restrict domains to tradewood.app in the Reown dashboard
-- [ ] Cloudflare Pages deploy
+- [ ] Cloudflare deploy: Worker `tradewood` (static assets, `frontend/wrangler.jsonc`) via Workers Builds from `main`, root `frontend`; custom domain tradewood.app
 - [ ] Cloudflare Pages + tradewood.app DNS
 - [ ] Mainnet launch
