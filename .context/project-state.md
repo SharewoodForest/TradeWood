@@ -116,7 +116,22 @@ Example from the fork, 0.5 ETH → USDG: V3 0.05% = 1,238.60 · V3 0.3% = 1,233.
 
 **Fee tiers (by staked WOOD, approved):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.25% · Outlaw 10,000 → 0.20% · Merry Man 50,000+ → 0.10% + WOOD rebates. (Original chat: 0.30 / 0.20 / 0.10 / 0%.) Discounts come out of the LP + treasury split proportionally.
 
-### Sherwood Seed Sale — Early Buyers (PROPOSED — needs numbers)
+### Sherwood Seed Sale — Early Buyers (PROPOSED numbers, 2026-10-08; see `.context/launch-research.md`)
+
+| Setting | Value |
+|---|---|
+| Tokens for sale | 10M WOOD |
+| Hard cap / soft cap | **$20,000 / $5,000** (soft cap = 25% of hard cap, the launchpad norm) |
+| Sale price → launch price | **$0.002 → $0.0025** ($200K full-supply value). Drop to $0.001 if the router isn't live with volume yet. |
+| Per wallet | min $25 · max $500 (whitelist round) · max $1,000 (public round) |
+| Rounds | Founding Outlaws whitelist 48h (earned via Bounty Points), then public 72h |
+| Payment | ETH or USDG at a rate fixed when the sale opens |
+| Unlock | 50% at launch, 50% over 30 days |
+| Funds | 70% → liquidity locked 12 months; 30% → treasury |
+| Unsold | Burned |
+| **Order** | **Router + Bounty Points live first, then the sale ("ship before you sell")** |
+
+Earlier notes:
 
 Goal: raise launch liquidity from early supporters instead of out of pocket, and reward them for coming in first.
 
