@@ -37,11 +37,30 @@ _No contracts deployed yet. Claude updates this section with addresses, ABIs and
 - Trade tax **3%**: 2% auto-LP (liquidity locked) + 1% treasury
 - Exclusions: owner, token contract, router, treasury
 
-**Revenue streams:** swap fee 0.30% (0.25% LPs / 0.05% treasury) · WOOD trade tax · 10% vault performance fee · 2–5% early-unbond penalty · flash loans 0.09% · launchpad/listing fees · sponsored quests.
+### Revenue Engine (APPROVED 2026-10-08)
 
-**Fee tiers (by staked WOOD, proposed):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.25% · Outlaw 10,000 → 0.20% · Merry Man 50,000+ → 0.10% + WOOD rebates. (Original chat: 0.30 / 0.20 / 0.10 / 0%.) Discounts come out of the LP + treasury split proportionally.
+**Solvency rule:** no reward pays out more cash than the same activity brings in. Cash referral payouts are a capped slice of fees on referred trades. Every WOOD incentive comes from pre-minted allocations, so nothing is open-ended.
 
-### Merry Men Referral Program (PROPOSED v1 — 2026-10-08)
+| # | Stream | Mechanic | Treasury take | Phase |
+|---|---|---|---|---|
+| 1 | **Sherwood Router fee** | Routes swaps through the best available Robinhood Chain DEX liquidity (and Tradewood pools once live); adds a protocol fee on top | **0.10%** of routed volume | v1 |
+| 2 | **$WOOD trade tax** | 1% treasury + 2% auto-LP on WOOD buys/sells (Section 3) | 1% in ETH | v1 |
+| 3 | **Protocol-owned liquidity** | Auto-LP tokens are minted to the treasury, so it earns LP fees on its own liquidity and the pool keeps deepening | 0.24% LP fee on the POL share of the pool | v1 |
+| 4 | **Vault fees** | 10% performance fee on harvested yield; 3% early-exit fee on lockup vaults (Outlaw) | 10% of yield / 3% of early exits | v1 (Friar Tuck), v2 (others) |
+| 5 | **Tradewood AMM swap fee** | Own pools: 0.30% fee = 0.24% LPs / 0.06% treasury | 0.06% | v2 |
+| 6 | **Launchpad & listing** | Robinhood Chain projects list or presell through Tradewood | $500–$2,500 flat or 2–5% of raise | v3 |
+| 7 | **Sponsored quests** | Projects pay for featured quests on the Quest Board | $250–$1,000+ per campaign | v3 |
+| — | Flash loans | **Deferred**: high audit risk, near-zero revenue on thin liquidity | — | later |
+
+**Why the router comes first:** a $50–$100 seeded pool can't generate meaningful swap fees. A router fee earns from day one on every trade, including stock tokens and ETH/USDG, using liquidity that already exists. **To verify:** which DEXs and aggregators are live on Robinhood Chain (4663), and their router addresses.
+
+**Costs to plan for:** a security audit is the main expense (budget roughly $5k–$30k depending on scope). Gas on Robinhood Chain and Cloudflare Pages hosting cost very little.
+
+**Illustration only, not a forecast.** At $500K/month routed volume and $100K/month of WOOD trading: router $500 + WOOD tax $1,000 + POL fees (small) ≈ **$1,500/mo**, minus referral cash on referred trades (≤ $150 at Founding rates).
+
+**Fee tiers (by staked WOOD, approved):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.25% · Outlaw 10,000 → 0.20% · Merry Man 50,000+ → 0.10% + WOOD rebates. (Original chat: 0.30 / 0.20 / 0.10 / 0%.) Discounts come out of the LP + treasury split proportionally.
+
+### Merry Men Referral Program (APPROVED v1 — 2026-10-08)
 
 Design rule: **cash rewards come only from the treasury's cut, on referred volume only, and the treasury always keeps ≥70%.** Excitement comes from a **fixed $WOOD budget** carved from the Guild fund, so the program can never overspend.
 
@@ -78,7 +97,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 
 **Worked example:** at $1M/month of referred volume, fees are $3,000. Treasury cut = $600, Founding cash payout = $180, treasury net = $420. All WOOD rewards come from the pre-set allocation, so no cash leaves.
 
-**Related fix:** the "Merry Man" tier (0% swap fee + 100% rebates) would wipe out revenue from the most active traders. Proposed: Merry Man = **0.10%** fee, with rebates paid in WOOD from the quests budget.
+**Related fix (approved):** the "Merry Man" tier is **0.10%** (not 0%), with rebates paid in WOOD from the quests budget.
 
 ## 4. Network & Contract Parameters
 
@@ -114,8 +133,11 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [x] Repo created (`SharewoodForest/TradeWood`)
 - [x] Agent skill specs: `.context/claude-skills.md`, `.context/gemini-skills.md`
 - [x] UI mock imported to `design/`
-- [ ] Decide scope & resolve Section 6
-- [ ] Contracts: WoodToken → tests → testnet (46630)
+- [x] Scope: DEX + vaults + referrals + quests; referral v1 + fee tiers approved
+- [ ] Verify live Robinhood Chain DEXs/routers (needed for Sherwood Router)
+- [ ] **v1 contracts:** WoodToken → SherwoodRouter (fee) → FriarTuckVault → MerryMenReferral → tests → testnet (46630) → audit
+- [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
+- [ ] **v3:** Launchpad, sponsored quests
 - [ ] Frontend scaffold (Next.js + Wagmi, chain 4663)
 - [ ] Cloudflare Pages + tradewood.app DNS
 - [ ] Mainnet launch
