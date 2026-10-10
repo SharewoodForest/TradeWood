@@ -114,7 +114,7 @@ Example from the fork, 0.5 ETH → USDG: V3 0.05% = 1,238.60 · V3 0.3% = 1,233.
 
 **Illustration only, not a forecast.** At $500K/month routed volume and $100K/month of WOOD trading: router $500 + WOOD tax $1,000 + POL fees (small) ≈ **$1,500/mo**, minus referral cash on referred trades (≤ $150 at Founding rates).
 
-**Fee tiers (by staked WOOD, approved):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.25% · Outlaw 10,000 → 0.20% · Merry Man 50,000+ → 0.10% + WOOD rebates. (Original chat: 0.30 / 0.20 / 0.10 / 0%.) Discounts come out of the LP + treasury split proportionally.
+**Fee tiers (by staked WOOD, approved):** Peasant 0 → 0.30% · Yeoman 1,000 → 0.25% · Outlaw 10,000 → 0.20% · **King G** 50,000+ → 0.10% + WOOD rebates (tier renamed from "Merry Man" 2026-10-09). (Original chat: 0.30 / 0.20 / 0.10 / 0%.) Discounts come out of the LP + treasury split proportionally.
 
 ### Sherwood Seed Sale — Early Buyers (PROPOSED numbers, 2026-10-08; see `.context/launch-research.md`)
 
@@ -206,7 +206,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 
 **Worked example:** at $1M/month of referred volume, fees are $3,000. Treasury cut = $600, Founding cash payout = $180, treasury net = $420. All WOOD rewards come from the pre-set allocation, so no cash leaves.
 
-**Related fix (approved):** the "Merry Man" tier is **0.10%** (not 0%), with rebates paid in WOOD from the quests budget.
+**Related fix (approved):** the "King G" tier is **0.10%** (not 0%), with rebates paid in WOOD from the quests budget.
 
 ## 4. Network & Contract Parameters
 
