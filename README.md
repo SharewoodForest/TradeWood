@@ -1,6 +1,6 @@
 # TradeWood (tradewood.app)
 
-**The Sherwood Protocol on Robinhood Chain.** $WOOD token, Forest Exchange, yield vaults, Merry Men referrals and quests.
+**The Sherwood Protocol on Robinhood Chain.** $WOOD token, Forest Exchange, yield vaults, Bounty Bandits referrals and quests.
 
 > Agents and contributors: read [`.context/project-state.md`](.context/project-state.md) first. It's the source of truth.
 

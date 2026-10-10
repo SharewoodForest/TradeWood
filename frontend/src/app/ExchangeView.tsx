@@ -23,7 +23,7 @@ export function ExchangeView() {
             {[
               { icon: "fa-route", t: "Multi-venue routing", d: "V2 + V3 (0.05%, 0.3%, 1%) scanned live, direct and via WETH." },
               { icon: "fa-shield-halved", t: "Slippage-guarded", d: "The contract reverts if you'd receive less than your minimum." },
-              { icon: "fa-users", t: "Merry Men rewards", d: "Swaps made through a referral link earn your recruiter rewards." },
+              { icon: "fa-mask", t: "Bounty Bandits rewards", d: "Swaps made through a referral link earn your recruiter rewards." },
             ].map((c) => (
               <div key={c.t} className="glass-card rounded-2xl p-4">
                 <i className={`fa-solid ${c.icon} text-neonGreen`} />

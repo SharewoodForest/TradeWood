@@ -11,7 +11,7 @@ const PHASES = [
   { name: "Steady", when: "Epoch 14+", t1: "15%", t2: "3%", pool: "~56,400" },
 ];
 
-export function MerryMenView() {
+export function BountyBanditsView() {
   const { address, isConnected } = useAccount();
   const toast = useToast();
   const [copied, setCopied] = useState(false);
@@ -28,7 +28,7 @@ export function MerryMenView() {
   };
   return (
     <div className="space-y-8">
-      <PageHero gold pill="Merry Men Guild" pillIcon="fa-users" title={<>Recruit the band. <span className="gradient-gold-text">Share the spoils.</span></>}
+      <PageHero gold pill="Bounty Bandits" pillIcon="fa-mask" title={<>Recruit your crew. <span className="gradient-gold-text">Split the bounty.</span></>}
         sub="Earn a share of Sherwood fees on every swap your recruits make, plus $WOOD bonuses from a fixed guild budget." />
 
       <div className="glass-card-gold rounded-3xl p-6 max-w-3xl mx-auto">

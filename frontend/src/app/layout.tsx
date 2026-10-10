@@ -9,14 +9,14 @@ import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "TradeWood | The Sherwood Protocol on Robinhood Chain",
-  description: "Best-route swaps across Uniswap V2 and V3 on Robinhood Chain, plus $WOOD vaults, Merry Men referrals and quests.",
+  description: "Best-route swaps across Uniswap V2 and V3 on Robinhood Chain, plus $WOOD vaults, Bounty Bandits referrals and quests.",
   metadataBase: new URL("https://tradewood.app"),
   applicationName: "TradeWood",
   keywords: ["TradeWood", "Sherwood Protocol", "Robinhood Chain", "DEX", "swap", "best route", "Uniswap", "$WOOD", "DeFi", "stock tokens"],
   alternates: { canonical: "https://tradewood.app/" },
   openGraph: {
     title: "TradeWood | The Sherwood Protocol on Robinhood Chain",
-    description: "Best-route swaps across Uniswap V2 and V3 on Robinhood Chain, plus $WOOD vaults, Merry Men referrals and quests.",
+    description: "Best-route swaps across Uniswap V2 and V3 on Robinhood Chain, plus $WOOD vaults, Bounty Bandits referrals and quests.",
     url: "https://tradewood.app/",
     siteName: "TradeWood",
     type: "website",

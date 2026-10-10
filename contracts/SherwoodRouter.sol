@@ -58,7 +58,7 @@ contract SherwoodRouter is Ownable2Step, Pausable, ReentrancyGuard {
         bytes v3Path; // V3 only: abi.encodePacked(token, uint24 fee, token, ...)
         address recipient;
         uint256 deadline;
-        address referrer; // Merry Men referral attribution (recorded in the event)
+        address referrer; // Bounty Bandits referral attribution (recorded in the event)
     }
 
     uint256 public constant BPS = 10_000;

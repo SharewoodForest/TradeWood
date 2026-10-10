@@ -5,7 +5,7 @@ import { safeStorage } from "@/lib/format";
 
 const KEY = "tradewood.referrer";
 
-/** Reads ?ref=0x… once and remembers it (Merry Men attribution). */
+/** Reads ?ref=0x… once and remembers it (Bounty Bandits attribution). */
 export function useReferrer(self?: Address): Address {
   const [ref, setRef] = useState<Address>(zeroAddress);
   useEffect(() => {

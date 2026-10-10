@@ -12,7 +12,7 @@
 |---|---|
 | **The Forest Exchange** (Swap) | AMM DEX: swap $WOOD, ETH, USDC/USDG and Robinhood Chain stock tokens. Slippage settings, route breakdown, price chart, live trade feed. |
 | **Yield Vaults** | Friar Tuck's Treasury (single-sided $WOOD, no lockup, paid from protocol fees) · Little John's LP Vault ($WOOD/ETH LP) · Outlaw Auto-Compounder (auto-reinvest). |
-| **Merry Men** (Referrals) | On-chain referral links; referrers earn a share of fees from invited wallets; leaderboard; claimable rewards. |
+| **Bounty Bandits** (Referrals; formerly "Merry Men") | On-chain referral links; referrers earn a share of fees from invited wallets; leaderboard; claimable rewards. |
 | **Quests** | Bounty Points for on-chain tasks (first swap, stake, refer, add LP); converted to $WOOD at the end of each 14-day epoch. |
 | **Analytics** | TVL, volume, burn, tokenomics breakdown. |
 
@@ -65,7 +65,7 @@ struct SwapParams {
   bytes   v3Path;       // V3: abi.encodePacked(token, uint24 fee, token, ...)
   address recipient;
   uint256 deadline;     // unix seconds
-  address referrer;     // Merry Men attribution (0x0 if none)
+  address referrer;     // Bounty Bandits attribution (0x0 if none)
 }
 ```
 
@@ -87,7 +87,7 @@ Example from the fork, 0.5 ETH → USDG: V3 0.05% = 1,238.60 · V3 0.3% = 1,233.
 ## 3. $WOOD Tokenomics
 
 - Total supply: **100,000,000 WOOD** (18 decimals)
-- Allocation (UI): 50% community yield & vaults · 25% DEX liquidity · 15% Merry Men guild & ecosystem fund · 10% auto-burn
+- Allocation (UI): 50% community yield & vaults · 25% DEX liquidity · 15% Bounty Bandits & ecosystem fund · 10% auto-burn
 - Launch: **early-buyer sale first** (the $50–$100 micro-seed plan is dropped). See the Seed Sale proposal below.
 - Anti-whale: max tx **1%**, max wallet **2%**
 - Trade tax **3%**: 2% auto-LP (liquidity locked) + 1% treasury
@@ -169,7 +169,7 @@ The Seed Sale is one path, not the only one. Revenue and growth run in parallel,
 
 **Decision rule:** if the sale reaches its soft cap, use Path A. If it misses, buyers get automatic refunds and launch switches to Path B or C within about a week, keeping the hype from the pre-launch quests. Prongs 1, 2 and 4 run no matter what.
 
-### Merry Men Referral Program (APPROVED v1 — 2026-10-08)
+### Bounty Bandits Referral Program (APPROVED v1 — 2026-10-08; renamed from "Merry Men" 2026-10-09)
 
 Design rule: **cash rewards come only from the treasury's cut, on referred volume only, and the treasury always keeps ≥70%.** Excitement comes from a **fixed $WOOD budget** carved from the Guild fund, so the program can never overspend.
 
@@ -187,7 +187,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 
 **B. $WOOD bonus (from the Guild fund, fixed budget)**
 
-- Referral budget: **6,000,000 WOOD** (40% of the 15M Merry Men Guild & Ecosystem Fund). The other 9M stays for quests and ecosystem.
+- Referral budget: **6,000,000 WOOD** (40% of the 15M Bounty Bandits & Ecosystem Fund). The other 9M stays for quests and ecosystem.
 - Fixed pool per epoch, split pro-rata by each referrer's referred volume:
   - Founding (epochs 1–6): **400,000 WOOD/epoch** → 2.4M
   - Growth (epochs 7–13): **200,000 WOOD/epoch** → 1.4M
@@ -269,7 +269,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [ ] Fork-test a single-sided V3 launch with WOOD's tax (fallback Path B)
 - [ ] Pre-launch quests + referral pre-registration (off-chain OK for v0)
 - [x] SherwoodRouter.sol (V2 + V3 venues, 0.10% fee) + 11 tests + mainnet-fork test
-- [ ] **v1 contracts (cont.):** FriarTuckVault → MerryMenReferral → testnet (46630) → audit
+- [ ] **v1 contracts (cont.):** FriarTuckVault → BountyBanditsReferral → testnet (46630) → audit
 - [ ] Router v2: add Uniswap V4 venue
 - [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
 - [ ] **v3:** Launchpad, sponsored quests

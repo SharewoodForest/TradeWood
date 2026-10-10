@@ -8,7 +8,7 @@ import { Dot } from "./Dot";
 export const NAV = [
   { href: "/", label: "Exchange", icon: "fa-solid fa-arrow-right-arrow-left", tone: "" },
   { href: "/vaults/", label: "Yield Vaults", icon: "fa-solid fa-vault", tone: "" },
-  { href: "/merry-men/", label: "Merry Men", icon: "fa-solid fa-users", tone: "text-sherwoodGold" },
+  { href: "/bounty-bandits/", label: "Bounty Bandits", icon: "fa-solid fa-mask", tone: "text-sherwoodGold" },
   { href: "/quests/", label: "Quests", icon: "fa-solid fa-scroll", tone: "text-amber-400" },
   { href: "/analytics/", label: "Analytics", icon: "fa-solid fa-chart-line", tone: "" },
   { href: "/docs/", label: "Docs", icon: "fa-solid fa-book-open", tone: "" },

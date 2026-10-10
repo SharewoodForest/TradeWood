@@ -6,7 +6,7 @@ export const metadata: Metadata = pageMeta("/analytics/", "Analytics | TradeWood
 const ALLOC = [
   { k: "Community Yield & Staking Vaults", pct: 50, color: "bg-neonGreen" },
   { k: "DEX Liquidity & Seed Sale", pct: 25, color: "bg-emeraldGlow" },
-  { k: "Merry Men Guild & Ecosystem Fund", pct: 15, color: "bg-sherwoodGold" },
+  { k: "Bounty Bandits & Ecosystem Fund", pct: 15, color: "bg-sherwoodGold" },
   { k: "Deflationary Burn Reserve", pct: 10, color: "bg-robinRed" },
 ];
 const REVENUE = [

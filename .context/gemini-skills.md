@@ -16,7 +16,7 @@ You must be prepared to build clean, responsive user interfaces for the followin
 
 * **The Forest Exchange (Swap):** Token swap UI for $WOOD, ETH, USDC/USDG and Robinhood Chain stock tokens, with slippage settings, route/price-impact breakdown and transparent swap projections before submitting.
 * **Yield Vaults:** Deposit / withdraw / harvest flows for Friar Tuck's Treasury (single-sided $WOOD), Little John's LP Vault and the Outlaw Auto-Compounder.
-* **Merry Men Referrals & Quests:** Referral link generation, claimable rewards, leaderboard, and quest progress / epoch claims.
+* **Bounty Bandits Referrals & Quests:** Referral link generation, claimable rewards, leaderboard, and quest progress / epoch claims.
 * **Frictionless Mobile-First UI:** Tailor all connection modals and button arrays to auto-detect and smooth out deep-linking for mobile wallets (like the Robinhood Wallet app via WalletConnect) alongside desktop browser extensions.
 
 ## 3. Grounding Rule

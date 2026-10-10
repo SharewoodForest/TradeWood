@@ -42,7 +42,7 @@ Next.js (App Router) + TypeScript + Tailwind CSS + wagmi v2 + viem + RainbowKit 
   - colors: obsidian `#050807`, panel `#111A14`, neon green `#00E676`, emerald `#10B981`, Sherwood gold `#F59E0B`, robin red `#FF3B30`
   - fonts: Outfit / Inter / Space Grotesk
   - glass cards, a sticky header, a mobile drawer
-- Tabs: **Forest Exchange (Swap)**, **Yield Vaults**, **Merry Men**, **Quests**, **Analytics**, **Docs**.
+- Tabs: **Forest Exchange (Swap)**, **Yield Vaults**, **Bounty Bandits**, **Quests**, **Analytics**, **Docs**.
 - **Fix the design's errors:**
   - The chain is **4663**, not 7777.
   - Gas is paid in ETH. Remove "0% gas / $RH gas" and the `$RH` and `$rOKX` tokens.
@@ -61,7 +61,7 @@ Implement exactly the routing described in project-state Section 2.2:
 5. Transaction states: idle → approving → swapping → confirmed (with a Blockscout link) → error (human-readable message for the router's custom errors such as `InsufficientOutput` and `Expired`).
 
 **Task 4 — Placeholders (no on-chain logic yet)**
-Yield Vaults, Merry Men, Quests and Analytics get layouts with "Coming soon" states. The Merry Men tab can already generate the user's referral link `https://tradewood.app/?ref=<address>`.
+Yield Vaults, Bounty Bandits, Quests and Analytics get layouts with "Coming soon" states. The Bounty Bandits tab can already generate the user's referral link `https://tradewood.app/?ref=<address>`.
 
 **Task 5 — Quality + deploy prep**
 - Mobile-first. Test at 375px and desktop widths. Get WalletConnect deep links working on mobile.

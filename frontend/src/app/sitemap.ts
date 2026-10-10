@@ -6,7 +6,7 @@ const BASE = "https://tradewood.app";
 const PAGES: { path: string; priority: number; changeFrequency: "daily" | "weekly" | "monthly" }[] = [
   { path: "/", priority: 1.0, changeFrequency: "daily" },
   { path: "/vaults/", priority: 0.8, changeFrequency: "weekly" },
-  { path: "/merry-men/", priority: 0.8, changeFrequency: "weekly" },
+  { path: "/bounty-bandits/", priority: 0.8, changeFrequency: "weekly" },
   { path: "/quests/", priority: 0.7, changeFrequency: "weekly" },
   { path: "/analytics/", priority: 0.6, changeFrequency: "weekly" },
   { path: "/docs/", priority: 0.7, changeFrequency: "monthly" },
