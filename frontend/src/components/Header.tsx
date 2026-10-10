@@ -23,14 +23,14 @@ export function Header() {
     <header className="sticky top-0 z-40 glass-card border-x-0 border-t-0 border-b border-emeraldGlow/20 px-4 lg:px-8 py-3.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 group shrink-0" onClick={() => setOpen(false)}>
-          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-neonGreen via-emeraldGlow to-forestDark p-0.5 shadow-emerald-glow group-hover:scale-105 transition-all duration-300">
-            <div className="w-full h-full bg-obsidian rounded-[14px] flex items-center justify-center">
-              <i className="fa-solid fa-tree text-neonGreen text-xl group-hover:rotate-12 transition-transform" />
-            </div>
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-sherwoodGold rounded-full border-2 border-obsidian flex items-center justify-center text-[8px] text-black">
-              <i className="fa-solid fa-feather" />
-            </span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo-mark.png"
+            alt="TradeWood logo"
+            width={44}
+            height={56}
+            className="h-11 sm:h-12 w-auto group-hover:scale-105 transition-transform duration-300"
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-display font-black text-xl sm:text-2xl tracking-tight text-white">
