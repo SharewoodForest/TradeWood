@@ -27,6 +27,17 @@
 6. **Lean into stock tokens:** they're where Robinhood Chain volume is, so the router and UI should feature them.
 7. Launchpads like Pons and Pools Trade mint their own standard tokens, so they **can't launch WoodToken** (custom tax). Fallback Path C means our own curve contract.
 
+## 5. Competitor note: Fables (fables.fi), checked 2026-10-11
+A ve(3,3) exchange built on Uniswap V4 hooks (the same PoolManager 0x8366…0951). It has about $37.7M total deposits, $2.76B lifetime volume and 65 markets. We are **not** integrating its tokens. Takeaways:
+- **V4 holds the deepest liquidity.** The Fables ETH/USDG pool has about $24M TVL and about $11.7M/day volume (pool id 0xbac3aa3b…e551, hook 0x06a88987…6080, tick spacing 10). Sherwood Router only routes V2/V3, so it misses this pool → add a V4 venue (quote via V4 Quoter / StateView 0xf3334192d15450cdd385c8b70e03f9a6bd9e673b).
+- **Dynamic fees.** A keeper sets each pool's fee from measured volatility (ETH/USDG ranges 0.07%–0.6%; about 1,100 changes a week). It also uses "calendar" hooks for stock tokens (market hours) and "flat" hooks for memes. Idea for a future WOOD pool hook.
+- **Time-boxed points season** on LP swap-fee earnings (ends 19 Oct), plus "additional weekly rewards" on some pools distributed through **Merkl** (api.merkl.xyz). We could use Merkl for WOOD LP and quest incentives instead of a custom distributor.
+- **Per-market pages** show TVL, 24h vol/fees, APR, current fee, pool balances, pool id/hook, and recent transactions with explorer links. This is a good template for our Analytics and Vaults pages.
+- **Creator fee** on markets, which suggests a fee share for token teams that bring liquidity (a possible Bounty Bandits / partner angle).
+- **Compliance:** geo-blocks deposits ("not available in your region") and has a Terms page. Withdraw/claim stays open. This is relevant to the Seed Sale and legal review.
+- **Distribution:** listed on DefiLlama (protocol "fables"). Uses robin.etherscan.io as its explorer. Ecosystem partners linked: Frax (frxUSD), Arrow (aUSD), Own (eUSD), Saffron, Crossbow, Throne, Route, Hookr, Goldstein, MCDAO, earnonhood, mosh.trade. These are outreach targets.
+- Official Robinhood stock tokens (name suffix "• Robinhood Token", e.g. NVDA 0xd0601ce1…9eec, SPY 0x117cc213…4c0c) already have Uniswap V2 pairs that our router can reach, if we ever want stock pairs in the token list.
+
 ## Sources
 - Pons: datawallet.com/crypto/pons-explained · coingabbar.com (Pons V2 model)
 - Pons vs Pools Trade: airdropalert.com/blogs/pons-family-vs-pools-trade
