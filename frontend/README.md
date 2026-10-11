@@ -34,5 +34,5 @@ One-time setup in the Cloudflare dashboard → **Workers & Pages** → **Create*
 After that, every merge to `main` deploys automatically. Manual deploy: `npm run build && npx wrangler deploy` (needs `wrangler login`).
 
 ## What's live vs. placeholder
-- **Live:** network ticker (block, gas, ETH price), wallet connect + balances, multi-venue quotes (Uniswap V2 + V3 0.05/0.3/1%, direct and via WETH), price impact, min-received, approve + swap via SherwoodRouter (once its address is set), referral link capture (`?ref=`).
+- **Live:** network ticker (block, gas, ETH price), wallet connect + balances, multi-venue quotes (Uniswap V2, V3 and V4, direct and via WETH/ETH) with the Sherwood Split optimizer, price impact, min-received, approve + swap via SherwoodRouter (once its address is set), referral link capture (`?ref=`).
 - **Placeholder until contracts ship:** vault deposits, referral stats/claims, quests, protocol analytics.

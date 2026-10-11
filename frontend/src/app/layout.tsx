@@ -9,20 +9,20 @@ import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "TradeWood | The Sherwood Protocol on Robinhood Chain",
-  description: "Best-route swaps across Uniswap V2 and V3 on Robinhood Chain, plus $WOOD vaults, Bounty Bandits referrals and quests.",
+  description: "Best-price swaps across Uniswap V2, V3 and V4 on Robinhood Chain, plus $WOOD vaults, Bounty Bandits referrals and quests.",
   metadataBase: new URL("https://tradewood.app"),
   applicationName: "TradeWood",
   keywords: ["TradeWood", "Sherwood Protocol", "Robinhood Chain", "DEX", "swap", "best route", "Uniswap", "$WOOD", "DeFi", "stock tokens"],
   alternates: { canonical: "https://tradewood.app/" },
   openGraph: {
     title: "TradeWood | The Sherwood Protocol on Robinhood Chain",
-    description: "Best-route swaps across Uniswap V2 and V3 on Robinhood Chain, plus $WOOD vaults, Bounty Bandits referrals and quests.",
+    description: "Best-price swaps across Uniswap V2, V3 and V4 on Robinhood Chain, plus $WOOD vaults, Bounty Bandits referrals and quests.",
     url: "https://tradewood.app/",
     siteName: "TradeWood",
     type: "website",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "TradeWood — The Sherwood Protocol on Robinhood Chain" }],
   },
-  twitter: { card: "summary_large_image", title: "TradeWood | The Sherwood Protocol on Robinhood Chain", description: "Best-route swaps across Uniswap V2 and V3 on Robinhood Chain.", images: ["/og.png"] },
+  twitter: { card: "summary_large_image", title: "TradeWood | The Sherwood Protocol on Robinhood Chain", description: "Best-price swaps across Uniswap V2, V3 and V4 on Robinhood Chain.", images: ["/og.png"] },
   robots: { index: true, follow: true },
 };
 export const viewport: Viewport = { themeColor: "#050807", width: "device-width", initialScale: 1 };
@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               url: "https://tradewood.app/",
               applicationCategory: "FinanceApplication",
               operatingSystem: "Web",
-              description: "Best-route token swaps across Uniswap V2 and V3 on Robinhood Chain, with $WOOD vaults, referrals and quests.",
+              description: "Best-price token swaps across Uniswap V2, V3 and V4 on Robinhood Chain, with $WOOD vaults, referrals and quests.",
               offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
             }),
           }}

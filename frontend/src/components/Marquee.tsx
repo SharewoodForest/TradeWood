@@ -18,7 +18,7 @@ export function Marquee() {
       <Item label="BLOCK" value={block ? `#${block.toLocaleString("en-US")}` : "—"} />
       <Item label="GAS" value={gas ? `${Number(formatGwei(gas)).toFixed(4)} gwei (ETH)` : "—"} tone="text-emeraldGlow" />
       <Item label="$WOOD" value="Launching soon" tone="text-goldLight" />
-      <Item dot label="SHERWOOD ROUTER" value="Uniswap V2 + V3 best-route engine" />
+      <Item dot label="SHERWOOD ROUTER" value="Uniswap V2 + V3 + V4 split-route engine" />
     </>
   );
   return (

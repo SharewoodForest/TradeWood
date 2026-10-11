@@ -21,6 +21,9 @@ module.exports = {
           }
         : {}),
     },
+    // Local Robinhood Chain fork via anvil (supports Cancun/transient storage, which Uniswap V4 needs):
+    //   anvil --fork-url https://rpc.mainnet.chain.robinhood.com --chain-id 4663
+    anvil: { url: "http://127.0.0.1:8545", chainId: 4663, accounts: [] },
     robinhood: {
       url: process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com",
       chainId: 4663,

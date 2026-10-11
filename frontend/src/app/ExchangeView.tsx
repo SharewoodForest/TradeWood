@@ -11,7 +11,7 @@ export function ExchangeView() {
         pill="Best-route DEX on Robinhood Chain"
         pillIcon="fa-shield-halved"
         title="The Forest Exchange"
-        sub="Every swap is scanned across Uniswap V2 and every V3 pool tier, then routed to whichever pays you the most."
+        sub="Every swap is scanned across every Uniswap V2, V3 and V4 pool, then routed to whichever pays you the most, or split across several when that pays more."
       />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-5 mx-auto w-full max-w-md lg:max-w-none">
@@ -21,7 +21,7 @@ export function ExchangeView() {
           <RoutePanel data={s.debounced === s.amountIn ? s.quotes.data : undefined} loading={s.quotes.isFetching || s.debounced !== s.amountIn} tokenOut={s.tokenOut} hasAmount={s.amountIn > 0n} />
           <div className="grid sm:grid-cols-3 gap-4">
             {[
-              { icon: "fa-route", t: "Multi-venue routing", d: "V2 + V3 (0.05%, 0.3%, 1%) scanned live, direct and via WETH." },
+              { icon: "fa-route", t: "Multi-venue routing", d: "Every Uniswap V2, V3 and V4 pool scanned live, and big trades split across venues for a better price." },
               { icon: "fa-shield-halved", t: "Slippage-guarded", d: "The contract reverts if you'd receive less than your minimum." },
               { icon: "fa-mask", t: "Bounty Bandits rewards", d: "Swaps made through a referral link earn your recruiter rewards." },
             ].map((c) => (

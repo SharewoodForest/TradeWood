@@ -70,8 +70,9 @@ export function SwapCard({ s }: { s: SwapState }) {
   });
 
   const q: QuoteResult | undefined = debounced === amountIn ? quotes.data : undefined;
-  const best = q?.best;
-  const minOut = best ? (best.amountOut * BigInt(10_000 - slippageBps)) / 10_000n : undefined;
+  const plan = q?.plan;
+  const best = plan; // what the router will execute (single route or split)
+  const minOut = plan ? (plan.amountOut * BigInt(10_000 - slippageBps)) / 10_000n : undefined;
   const stale = amountIn > 0n && (debounced !== amountIn || quotes.isFetching) && !q;
 
   const setFraction = (f: number) => {
@@ -116,7 +117,7 @@ export function SwapCard({ s }: { s: SwapState }) {
   }
 
   async function swap() {
-    if (!SHERWOOD_ROUTER || !client || !address || !best || minOut === undefined) return;
+    if (!SHERWOOD_ROUTER || !client || !address || !plan || minOut === undefined) return;
     try {
       setBusy("swapping");
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
@@ -128,13 +129,11 @@ export function SwapCard({ s }: { s: SwapState }) {
         value: tokenIn.address === NATIVE ? amountIn : 0n,
         args: [
           {
-            venue: best.venue,
             tokenIn: tokenIn.address,
             tokenOut: tokenOut.address,
             amountIn,
             minAmountOut: minOut,
-            v2Path: best.v2Path,
-            v3Path: best.v3Path,
+            legs: plan.legs.map((l) => ({ venue: l.route.venue, weightBps: l.weightBps, data: l.route.data })),
             recipient: address,
             deadline,
             referrer,
@@ -143,7 +142,7 @@ export function SwapCard({ s }: { s: SwapState }) {
       });
       const rc = await client.waitForTransactionReceipt({ hash });
       if (rc.status !== "success") throw new Error("Transaction reverted");
-      toast({ kind: "success", title: `Swapped ${tokenIn.symbol} → ${tokenOut.symbol}`, body: `via ${best.label}`, href: explorerTx(hash) });
+      toast({ kind: "success", title: `Swapped ${tokenIn.symbol} → ${tokenOut.symbol}`, body: `via ${plan.label}`, href: explorerTx(hash) });
       setAmountStr("");
     } catch (e) {
       toast({ kind: "error", title: "Swap failed", body: humanError(e) });
@@ -257,7 +256,10 @@ export function SwapCard({ s }: { s: SwapState }) {
       {/* Details */}
       <div className="mt-4 p-3.5 rounded-xl bg-panelBg/80 border border-emeraldGlow/10 text-xs space-y-2 font-mono">
         <Row label="Rate" value={best && q ? `1 ${tokenIn.symbol} = ${rate(q.net, best.amountOut, tokenIn, tokenOut)} ${tokenOut.symbol}` : "—"} />
-        <Row label="Best Route" value={best ? `${best.label}${best.hops === "via WETH" ? " (via WETH)" : ""}` : "—"} tone="text-neonGreen" />
+        <Row label={plan?.split ? "Split Route" : "Best Route"} value={plan ? plan.label : "—"} tone="text-neonGreen" />
+        {plan?.split && plan.splitGain > 0n && (
+          <Row label="Split Bonus" value={`+${fmtAmount(plan.splitGain, tokenOut.decimals)} ${tokenOut.symbol}`} tone="text-goldLight" />
+        )}
         <Row label={`Sherwood Fee (${q ? Number(q.feeBps) / 100 : 0.1}%)`} value={q ? `${fmtAmount(q.fee, tokenIn.decimals)} ${tokenIn.symbol}` : "—"} />
         {q && q.woodTaxBps > 0n && <Row label="$WOOD Tax (auto-LP + treasury)" value={`${Number(q.woodTaxBps) / 100}%`} tone="text-goldLight" />}
         <Row
@@ -337,6 +339,8 @@ const ROUTER_ERRORS: Record<string, string> = {
   EnforcedPause: "Swaps are temporarily paused.",
   InvalidPath: "That route is no longer valid. Refresh quotes.",
   InvalidAmount: "Invalid amount.",
+  InvalidLegs: "That route is no longer valid. Refresh quotes.",
+  PartialFill: "A pool ran out of liquidity mid-swap. Try a smaller amount.",
   SameToken: "Pick two different tokens.",
 };
 

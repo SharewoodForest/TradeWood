@@ -50,39 +50,49 @@ Standard ERC-20 (name `TradeWood`, symbol `WOOD`, 18 decimals) + ERC-2612 `permi
 
 **Owner powers (all bounded):** tax capped at 5%/side · limits can't go below 0.5% tx / 1% wallet · `enableTrading` and `removeLimits` are one-way · can't withdraw accrued WOOD tax · two-step ownership transfer. Vault, sale and referral contracts must be set `isFeeExempt` + `isLimitExempt`.
 
-### 2.2 SherwoodRouter interface (`contracts/SherwoodRouter.sol`)
+### 2.2 SherwoodRouter interface (`contracts/SherwoodRouter.sol`), v2: V2 + V3 + V4 with split routing (2026-10-11)
 
 One entry point: `swap(SwapParams p) payable returns (uint256 amountOut)`.
+Constructor: `(weth, v2Router, v3SwapRouter02, v4PoolManager, treasury, owner)`.
 
 ```
 struct SwapParams {
-  uint8   venue;        // 0 = Uniswap V2, 1 = Uniswap V3
   address tokenIn;      // 0x0 = native ETH
   address tokenOut;     // 0x0 = native ETH
   uint256 amountIn;     // for ETH in, msg.value must equal amountIn
-  uint256 minAmountOut; // slippage floor, net of the router fee
-  address[] v2Path;     // V2: [tokenIn|WETH, ..., tokenOut|WETH]
-  bytes   v3Path;       // V3: abi.encodePacked(token, uint24 fee, token, ...)
+  uint256 minAmountOut; // ONE slippage floor for the whole trade, net of the router fee
+  Leg[]   legs;         // 1–4 legs; weights must sum to 10_000; the last leg gets the rounding remainder
   address recipient;
   uint256 deadline;     // unix seconds
   address referrer;     // Bounty Bandits attribution (0x0 if none)
 }
+struct Leg { uint8 venue; uint16 weightBps; bytes data; }   // venue 0 = V2, 1 = V3, 2 = V4
+// data: V2 → abi.encode(address[] path)            (WETH stands in for ETH)
+//       V3 → abi.encodePacked(token, uint24 fee, token, ...)   (WETH stands in for ETH)
+//       V4 → abi.encode(V4Hop[])  where V4Hop = { PoolKey key; bytes hookData }
+//            PoolKey = { currency0, currency1, uint24 fee, int24 tickSpacing, hooks }; ETH may be 0x0 (native pool) or WETH
 ```
 
-**Read:** `feeBps()` (default 10 = 0.10%, hard cap 30) · `quoteFee(amountIn) → (fee, netAmountIn)` · `paused()` · `treasury()`.
-**Event:** `SherwoodSwap(user, referrer, venue, tokenIn, tokenOut, amountIn, amountOut, feeAmount, recipient)`. The referral indexer reads this.
+**Read:** `feeBps()` (default 10 = 0.10%, hard cap 30) · `quoteFee(amountIn) → (fee, netAmountIn)` · `paused()` · `treasury()` · `MAX_LEGS()` = 4.
+**Event:** `SherwoodSwap(user, referrer, tokenIn, tokenOut, amountIn, amountOut, feeAmount, recipient, uint8 venueMask, uint8 legs)`. venueMask bits: 1 = V2, 2 = V3, 4 = V4. The referral indexer reads this.
+**Errors:** `Expired, InvalidAmount, InvalidPath, InvalidLegs, InsufficientOutput(out, min), FeeTooHigh, EthTransferFailed, SameToken, NotPoolManager, PartialFill`.
 
-**How the frontend picks the route ("multi-prong"):**
-1. `quoteFee(amountIn)` → `net`.
-2. Quote `net` on each venue in parallel:
-   - V2: `getAmountsOut(net, path)` on the V2 router (deduct WOOD's 3% tax if WOOD is in the path)
-   - V3: `quoteExactInput(path, net)` on the V3 Quoter `0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7`, trying the 0.05%, 0.3% and 1% tiers
-3. Use the best output and set `minAmountOut = best × (1 − slippage)`.
-4. The user approves SherwoodRouter for `tokenIn` (ERC-20 only), then calls `swap`.
+**V4 mechanics:** the router calls `PoolManager.unlock`, swaps each hop exact-input inside `unlockCallback`, then settles the input (native ETH via `settle{value}`; ERC-20 via `sync → transfer → settle`) and takes the output. The exact input must be fully consumed on every hop, otherwise it reverts with `PartialFill`, so nothing is left behind. Hooked pools work; the Fables dynamic-fee ETH/USDG pool is fork-tested.
 
-Example from the fork, 0.5 ETH → USDG: V3 0.05% = 1,238.60 · V3 0.3% = 1,233.66 · V2 = 1,226.06. Picking the best route beats V2 alone by about 1%.
+**How the frontend picks the route ("multi-prong" + Sherwood Split), in `frontend/src/hooks/useSwapQuotes.ts` (`quoteSwap`):**
+1. `net = amountIn − fee`.
+2. Quote `net` on every candidate in parallel:
+   - V2: `getAmountsOut`, direct and via WETH (deduct WOOD tax if WOOD is in the trade)
+   - V3: QuoterV2 `quoteExactInput`, 0.05/0.3/1% tiers, direct and via WETH
+   - V4: find live pools with one multicall of `StateView.getLiquidity(poolId)`, covering the standard tiers (0.01/0.05/0.3/1%), native-ETH and WETH pools, the curated hooked pools (`V4_HOOKED_POOLS` in `config/contracts.ts`) and 2-hop via native ETH. Then quote them on V4 Quoter `quoteExactInput`.
+3. **Split optimizer:** take the top 3 routes that share no pool, quote each at 10%…100%, and allocate in 10% slices greedily by marginal output. Use the split only if it beats the best single route by ≥ 0.02%.
+4. `minAmountOut = plan.amountOut × (1 − slippage)`; approve (ERC-20 only); call `swap` with the plan's legs.
 
-**Notes:** route WOOD through **V2** (its pool and tax live there). Do **not** make SherwoodRouter limit-exempt in WoodToken, or buys through it would skip the max-tx limit. V4 venue: planned for router v2 (via Universal Router).
+**Fork results (anvil, 2026-10-11, after the 0.10% fee):** 1 ETH → V4 dynamic-fee pool 2,497.91 USDG vs V3 0.05% 2,497.71 vs V2 2,469.22 (V2 alone is about 1.1% worse). 400 ETH → split 90% V4 hook / 10% V3 0.05% = 997,411 USDG, **+267 USDG over the best single pool**. The frontend quote matched the executed output exactly. Router dust after every test: 0.
+
+**Notes:** route WOOD through **V2** only (`v2Only`): its pool and tax live there, and V4's sync/settle can't take fee-on-transfer input. Do **not** make SherwoodRouter limit-exempt in WoodToken, or buys through it would skip the max-tx limit.
+
+**Testing:** `npx hardhat test` (unit; `MockPoolManager` reproduces V4 flash accounting). For live V4 you need Cancun/transient storage, so use anvil rather than the Hardhat fork: `anvil --fork-url https://rpc.mainnet.chain.robinhood.com --chain-id 4663` then `npx hardhat run scripts/fork-v4.js --network anvil`. Restart anvil before each run, because the public RPC isn't an archive node and old fork state expires.
 
 ## 3. $WOOD Tokenomics
 
@@ -240,6 +250,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 ### 5.1 Frontend status (2026-10-08, branch `frontend/app`, built by Claude)
 - `frontend/`: Next.js 15 static export, Tailwind (design tokens 1:1 from the mock), wagmi/viem/RainbowKit.
 - **Live now:** network ticker; wallet connect (extensions; mobile via WalletConnect once the project ID is set); balances; **multi-venue quotes** against mainnet (V2 + V3 tiers, direct and via WETH) with best-route pick, Sherwood fee, WOOD tax, price impact and min-received; approve + `SherwoodRouter.swap` (enabled when `NEXT_PUBLIC_SHERWOOD_ROUTER` is set); `?ref=` capture.
+- **2026-10-11:** Uniswap **V4** quotes (standard tiers + curated hooked pools, native ETH and WETH) and the **Sherwood Split** optimizer. The route panel shows the split bar, the "+X vs best single pool" gain and "% more than plain Uniswap V2"; the swap card shows Split Route / Split Bonus. Copy updated to "V2, V3 and V4".
 - **Placeholders:** vaults, referral stats/claims, quests, analytics metrics.
 - Design fixes applied: chain 4663 (not 7777), gas paid in ETH, no fake numbers, "on Robinhood Chain" wording, a non-affiliation footer.
 - Verified: build passes, desktop (1440px) and mobile (390px) render with no horizontal scroll, live quotes load in a browser.
@@ -257,6 +268,16 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 9. **Brand caution:** the UI uses "Robinhood Quest Board", "Robinhood Wallet (Featured) — Native 0% Fee Integration" and "Robinhood DEX". These could read as an official Robinhood partnership. Use "on Robinhood Chain" phrasing and avoid claims of integrations that don't exist.
 8. **EIP-7702 warning:** the public Hardhat test keys have sweeper delegations on Robinhood Chain. Never fund or use them on a live network.
 
+### 6.1 Competitive roadmap (from the Fables review, 2026-10-11; see `.context/launch-research.md` §5)
+Done: V4 routing, Sherwood Split. Next, in priority order:
+1. **Analytics/market pages** using Fables' layout: TVL, 24h volume and fees, APR, current fee, pool balances, and recent swaps from `SherwoodSwap` events with explorer links. Add a "Sherwood saved traders $X vs Uniswap V2" counter, a unique stat we can compute from our own events.
+2. **Points Season 1** (time-boxed, like Fables' 19-Oct season): points per $ routed + Bounty Bandits referrals, indexed off-chain from `SherwoodSwap`. Pays out in WOOD at TGE.
+3. **Merkl** for WOOD LP and quest incentives instead of a custom distributor (less to audit).
+4. **DefiLlama** adapter at launch (volume and fees from `SherwoodSwap`).
+5. **Partner / creator fee share**: token teams that bring liquidity get a share of router fees on their pairs (Bounty Bandits partner tier).
+6. **Region blocking + Terms page** before the Seed Sale (legal review); withdraw/claim always open.
+7. Later: a TradeWood V4 **dynamic-fee hook** for our own pools (volatility-based fee), but not for WOOD while it's a fee-on-transfer token.
+
 ## 7. Milestones
 
 - [x] Repo created (`SharewoodForest/TradeWood`)
@@ -270,7 +291,7 @@ Contract hard caps: Tier 1 ≤ 25%, Tier 1 + Tier 2 ≤ 30% of the treasury cut.
 - [ ] Pre-launch quests + referral pre-registration (off-chain OK for v0)
 - [x] SherwoodRouter.sol (V2 + V3 venues, 0.10% fee) + 11 tests + mainnet-fork test
 - [ ] **v1 contracts (cont.):** FriarTuckVault → BountyBanditsReferral → testnet (46630) → audit
-- [ ] Router v2: add Uniswap V4 venue
+- [x] Router v2: Uniswap V4 venue (direct PoolManager integration, hooked pools OK) + split routing across up to 4 legs; 20 router tests; anvil mainnet-fork test + frontend end-to-end on the fork (2026-10-11)
 - [ ] **v2:** Tradewood AMM pools, Little John LP vault, Outlaw auto-compounder, Quests/epoch claims
 - [ ] **v3:** Launchpad, sponsored quests
 - [x] Frontend v0 (Next.js + wagmi, chain 4663): layout, live multi-venue swap UI, placeholder pages (branch `frontend/app`)
