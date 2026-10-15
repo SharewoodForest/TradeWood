@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -15,9 +16,11 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable woodToken;
-    // Accepted stablecoins (all must be 6 decimals, treated as $1). Fixed at deploy.
+    // Stablecoins the owner has approved, each treated as exactly $1 (6 to 18 decimals).
+    // Anyone could deploy a worthless token, so the owner vets each one.
     address[] public acceptedTokens;
     mapping(address => bool) public isAccepted;
+    mapping(address => uint8) public tokenDecimals;
 
     uint256 public constant MIN_CONTRIBUTION = 10 * 1e6;       // $10
     uint256 public constant MAX_CONTRIBUTION = 200 * 1e6;      // $200
@@ -37,6 +40,7 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
 
     mapping(address => Participant) public participants;
 
+    event TokenAccepted(address indexed token, bool accepted);
     event TokensPurchased(address indexed buyer, address indexed token, uint256 paymentAmount, uint256 woodAmount);
     event SaleFinalized(uint256 totalRaised, uint256 totalTokens);
     event MilestoneUnlocked(uint256 newUnlockedBps);
@@ -49,18 +53,37 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
     ) Ownable(_initialOwner) {
         require(_paymentTokens.length > 0, "No payment tokens");
         woodToken = IERC20(_woodToken);
-        for (uint256 i = 0; i < _paymentTokens.length; i++) {
-            address t = _paymentTokens[i];
-            require(t != address(0) && !isAccepted[t], "Bad payment token");
-            isAccepted[t] = true;
-            acceptedTokens.push(t);
-        }
+        for (uint256 i = 0; i < _paymentTokens.length; i++) _accept(_paymentTokens[i]);
+    }
+
+    function _accept(address t) internal {
+        require(t != address(0) && tokenDecimals[t] == 0, "Bad payment token");
+        uint8 d = IERC20Metadata(t).decimals();
+        require(d >= 6 && d <= 18, "Unsupported decimals");
+        tokenDecimals[t] = d;
+        isAccepted[t] = true;
+        acceptedTokens.push(t);
+        emit TokenAccepted(t, true);
+    }
+
+    /// @notice Owner adds another stablecoin (e.g. a bridged one) while the sale is open.
+    function addAcceptedToken(address t) external onlyOwner {
+        require(!saleFinalized, "Sale has closed");
+        _accept(t);
+    }
+
+    /// @notice Owner can pause a token (for example if it depegs). Already-paid funds are unaffected.
+    function setTokenAccepted(address t, bool accepted) external onlyOwner {
+        require(tokenDecimals[t] != 0, "Unknown token");
+        isAccepted[t] = accepted;
+        emit TokenAccepted(t, accepted);
     }
 
     function acceptedTokensLength() external view returns (uint256) {
         return acceptedTokens.length;
     }
 
+    /// @param usdcAmount the dollar amount with 6 decimals ($50 = 50_000000), whatever the token's own decimals
     function buyTokens(address token, uint256 usdcAmount) external nonReentrant {
         require(isAccepted[token], "Token not accepted");
         require(!saleFinalized, "Sale has closed");
@@ -80,7 +103,11 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
         totalRaised += usdcAmount;
         totalTokensAllocated += woodAmount;
 
-        IERC20(token).safeTransferFrom(msg.sender, address(this), usdcAmount);
+        uint256 pull = usdcAmount * (10 ** (tokenDecimals[token] - 6));
+        IERC20 t = IERC20(token);
+        uint256 before = t.balanceOf(address(this));
+        t.safeTransferFrom(msg.sender, address(this), pull);
+        require(t.balanceOf(address(this)) - before == pull, "Fee-on-transfer token");
 
         emit TokensPurchased(msg.sender, token, usdcAmount, woodAmount);
     }

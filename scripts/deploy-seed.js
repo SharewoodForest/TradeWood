@@ -3,7 +3,7 @@
 // Run scripts/deploy.js first to deploy WoodToken, then this script.
 // Requires .env: DEPLOYER_PRIVATE_KEY (must be the WoodToken owner and hold the 1,000,000 $WOOD)
 //   WOOD_ADDRESS            deployed WoodToken
-//   PAYMENT_TOKEN_ADDRESSES comma-separated stablecoins backers can pay with (each 6 decimals, treated as $1)
+//   PAYMENT_TOKEN_ADDRESSES comma-separated stablecoins backers can pay with (each 6-18 decimals, treated as $1; more can be added later with addAcceptedToken)
 //   SALE_OWNER_ADDRESS      (optional) owner of the sale contract, defaults to deployer
 // This script never calls enableTrading(), never sets a pair, and never touches liquidity.
 const hre = require("hardhat");
@@ -33,7 +33,7 @@ async function main() {
       ["function decimals() view returns (uint8)", "function symbol() view returns (string)"], addr, deployer
     );
     const decimals = await pay.decimals();
-    if (decimals !== 6n) throw new Error(`Payment token ${addr} has ${decimals} decimals; WoodSeedSale assumes 6.`);
+    if (decimals < 6n || decimals > 18n) throw new Error(`Payment token ${addr} has ${decimals} decimals; WoodSeedSale supports 6-18.`);
     symbols.push(await pay.symbol());
   }
 

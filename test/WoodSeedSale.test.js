@@ -93,6 +93,29 @@ describe("WoodSeedSale", () => {
     expect(await usdc.balanceOf(treasury.address)).to.equal(U(80));
   });
 
+  it("owner can add an 18-decimal stablecoin; $ amounts still count 1:1; strangers cannot add tokens", async () => {
+    const f = await loadFixture(fixture);
+    const { sale, alice, usdg, treasury } = f;
+    const dai = await (await ethers.getContractFactory("MockERC20")).deploy("Dai", "DAI", 18);
+    const D = await dai.getAddress();
+    await expect(sale.connect(alice).addAcceptedToken(D)).to.be.reverted;
+    await expect(sale.connect(alice).buyTokens(D, U(50))).to.be.revertedWith("Token not accepted");
+    await sale.addAcceptedToken(D);
+    await expect(sale.addAcceptedToken(D)).to.be.revertedWith("Bad payment token");
+    await dai.mint(alice.address, E(500));
+    await dai.connect(alice).approve(f.saleA, ethers.MaxUint256);
+    await sale.connect(alice).buyTokens(D, U(50)); // $50 = 50 DAI
+    expect(await dai.balanceOf(f.saleA)).to.equal(E(50));
+    expect(await sale.totalRaised()).to.equal(U(50));
+    expect((await sale.participants(alice.address)).totalContributed).to.equal(U(50));
+    await sale.setTokenAccepted(D, false);
+    await expect(sale.connect(alice).buyTokens(D, U(10))).to.be.revertedWith("Token not accepted");
+    await wire(f);
+    await sale.finalizeSale(treasury.address);
+    expect(await dai.balanceOf(treasury.address)).to.equal(E(50));
+    await expect(sale.addAcceptedToken(await usdg.getAddress())).to.be.revertedWith("Sale has closed");
+  });
+
   describe("finalize needs the WOOD", () => {
     it("reverts without WOOD, then succeeds once the sale is funded", async () => {
       const f = await loadFixture(fixture);

@@ -226,6 +226,7 @@ const CONFIG = {
 const SALE_ABI = [
   "function acceptedTokensLength() view returns (uint256)",
   "function acceptedTokens(uint256) view returns (address)",
+  "function isAccepted(address) view returns (bool)",
   "function totalRaised() view returns (uint256)",
   "function saleFinalized() view returns (bool)",
   "function unlockedBps() view returns (uint256)",
@@ -246,8 +247,10 @@ const MIN = 10, MAX = 200, CAP = 7500, USDC_DEC = 6;
 const $ = (id) => document.getElementById(id);
 const live = /^0x[0-9a-fA-F]{40}$/.test(CONFIG.SEED_CONTRACT_ADDRESS);
 let provider, signer, account, sale, usdc, payToken;
-let tokens = []; // [{addr, sym}]
-const sym = () => (tokens.find((t) => t.addr === payToken) || {}).sym || "USD";
+let tokens = []; // [{addr, sym, dec}]
+const tok = () => tokens.find((t) => t.addr === payToken) || {};
+const sym = () => tok().sym || "USD";
+const tdec = () => tok().dec || 6;
 let state = { raised: 0, finalized: false, bps: 0, contributed: 0, allocated: 0n, claimed: 0n, claimable: 0n, bal: 0, allowance: 0n };
 
 const fmtUsd = (n) => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -295,7 +298,7 @@ function render() {
   $("connectBtn").textContent = account ? short(account) : "Connect Wallet";
 
   const v = validate();
-  const need = account && live && !state.finalized && v.ok && state.allowance < BigInt(Math.round((parseFloat($("amount").value) || 0) * 10 ** USDC_DEC));
+  const need = account && live && !state.finalized && v.ok && state.allowance < ethers.parseUnits(String(Math.round((parseFloat($("amount").value) || 0) * 100) / 100), tdec());
   $("buyBtn").disabled = !v.ok;
   $("buyBtn").textContent = v.ok ? (need ? `Approve ${sym()}` : `Contribute $${parseFloat($("amount").value)} in ${sym()}`) : v.why;
   $("notLive").classList.toggle("hidden", live);
@@ -322,7 +325,7 @@ async function refreshWallet() {
     ]);
     state.contributed = Number(ethers.formatUnits(p.totalContributed, USDC_DEC));
     state.allocated = p.totalAllocated; state.claimed = p.totalClaimed; state.claimable = claimable;
-    state.bal = Number(ethers.formatUnits(bal, USDC_DEC)); state.allowance = allow;
+    state.bal = Number(ethers.formatUnits(bal, tdec())); state.allowance = allow;
   } catch (e) { setMsg("Could not read your position.", "err"); }
   render();
 }
@@ -356,8 +359,9 @@ async function connect() {
       tokens = [];
       for (let i = 0; i < n; i++) {
         const addr = await sale.acceptedTokens(i);
-        const sy = await new ethers.Contract(addr, ERC20_ABI, signer).symbol();
-        tokens.push({ addr, sym: sy });
+        const c = new ethers.Contract(addr, ERC20_ABI, signer);
+        const [sy, dec] = await Promise.all([c.symbol(), c.decimals()]);
+        if (await sale.isAccepted(addr)) tokens.push({ addr, sym: sy, dec: Number(dec) });
       }
       $("payTok").innerHTML = tokens.map((t) => `<option value="${t.addr}">${t.sym}</option>`).join("");
       payToken = tokens[0].addr;
@@ -377,13 +381,15 @@ $("payTok").addEventListener("change", async () => {
 
 async function buy() {
   const v = validate(); if (!v.ok) return;
-  const amt = BigInt(Math.round(parseFloat($("amount").value) * 10 ** USDC_DEC));
+  const usd = Math.round(parseFloat($("amount").value) * 100) / 100;
+  const amt = ethers.parseUnits(String(usd), 6);                 // dollars, 6 decimals (what the contract counts)
+  const pull = ethers.parseUnits(String(usd), tdec());           // token units actually pulled
   $("buyBtn").disabled = true;
   try {
     await ensureChain();
-    if (state.allowance < amt) {
+    if (state.allowance < pull) {
       setMsg(`Approve ${sym()} in your wallet…`);
-      const tx = await usdc.approve(CONFIG.SEED_CONTRACT_ADDRESS, amt);
+      const tx = await usdc.approve(CONFIG.SEED_CONTRACT_ADDRESS, pull);
       await tx.wait();
       setMsg("Approved. Now confirm the contribution.", "ok");
       await refreshWallet(); return;
