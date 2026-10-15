@@ -1,9 +1,9 @@
 // Deploy the $WOOD seed sale and wire it to the (already deployed) WoodToken. Usage:
-//   WOOD_ADDRESS=0x… PAYMENT_TOKEN_ADDRESS=0x… npx hardhat run scripts/deploy-seed.js --network robinhood
+//   WOOD_ADDRESS=0x… PAYMENT_TOKEN_ADDRESSES=0xUSDG,0xUSDC npx hardhat run scripts/deploy-seed.js --network robinhood
 // Run scripts/deploy.js first to deploy WoodToken, then this script.
 // Requires .env: DEPLOYER_PRIVATE_KEY (must be the WoodToken owner and hold the 1,000,000 $WOOD)
 //   WOOD_ADDRESS            deployed WoodToken
-//   PAYMENT_TOKEN_ADDRESS   the stablecoin backers pay with (6 decimals; the sale math assumes 6)
+//   PAYMENT_TOKEN_ADDRESSES comma-separated stablecoins backers can pay with (each 6 decimals, treated as $1)
 //   SALE_OWNER_ADDRESS      (optional) owner of the sale contract, defaults to deployer
 // This script never calls enableTrading(), never sets a pair, and never touches liquidity.
 const hre = require("hardhat");
@@ -17,21 +17,25 @@ async function main() {
   if (!deployer) throw new Error("No signer: set DEPLOYER_PRIVATE_KEY in .env");
 
   const woodAddress = process.env.WOOD_ADDRESS;
-  const payAddress = process.env.PAYMENT_TOKEN_ADDRESS;
+  const payAddresses = (process.env.PAYMENT_TOKEN_ADDRESSES || "").split(",").map((x) => x.trim()).filter(Boolean);
   const saleOwner = process.env.SALE_OWNER_ADDRESS || deployer.address;
   if (!woodAddress) throw new Error("WOOD_ADDRESS required (deploy WoodToken first with scripts/deploy.js).");
-  if (!payAddress) throw new Error("PAYMENT_TOKEN_ADDRESS required. Confirm the stablecoin address on-chain first.");
+  if (!payAddresses.length) throw new Error("PAYMENT_TOKEN_ADDRESSES required. Confirm each stablecoin address on-chain first.");
 
-  for (const [name, addr] of [["WoodToken", woodAddress], ["Payment token", payAddress]]) {
+  for (const [name, addr] of [["WoodToken", woodAddress], ...payAddresses.map((a) => ["Payment token", a])]) {
     if ((await ethers.provider.getCode(addr)) === "0x") throw new Error(`No contract at ${name} ${addr} on chain ${chainId}.`);
   }
 
   const wood = await ethers.getContractAt("WoodToken", woodAddress, deployer);
-  const pay = await ethers.getContractAt(
-    ["function decimals() view returns (uint8)", "function symbol() view returns (string)"], payAddress, deployer
-  );
-  const decimals = await pay.decimals();
-  if (decimals !== 6n) throw new Error(`Payment token has ${decimals} decimals; WoodSeedSale assumes 6.`);
+  const symbols = [];
+  for (const addr of payAddresses) {
+    const pay = await ethers.getContractAt(
+      ["function decimals() view returns (uint8)", "function symbol() view returns (string)"], addr, deployer
+    );
+    const decimals = await pay.decimals();
+    if (decimals !== 6n) throw new Error(`Payment token ${addr} has ${decimals} decimals; WoodSeedSale assumes 6.`);
+    symbols.push(await pay.symbol());
+  }
 
   // The deployer must own the token (to set exemptions) and hold the seed allocation (to fund the sale).
   if ((await wood.owner()).toLowerCase() !== deployer.address.toLowerCase()) {
@@ -41,10 +45,10 @@ async function main() {
   if (bal < SEED_ALLOCATION) throw new Error(`Deployer holds ${ethers.formatUnits(bal, 18)} WOOD, needs 1,000,000.`);
 
   console.log(`Chain ${chainId} | deployer ${deployer.address}`);
-  console.log(`WoodToken ${woodAddress} | payment ${await pay.symbol()} ${payAddress} | sale owner ${saleOwner}`);
+  console.log(`WoodToken ${woodAddress} | payment ${symbols.join("/")} ${payAddresses.join(",")} | sale owner ${saleOwner}`);
 
   const Sale = await ethers.getContractFactory("WoodSeedSale", deployer);
-  const sale = await Sale.deploy(woodAddress, payAddress, saleOwner);
+  const sale = await Sale.deploy(woodAddress, payAddresses, saleOwner);
   await sale.waitForDeployment();
   const saleAddress = await sale.getAddress();
   console.log("WoodSeedSale:", saleAddress);
@@ -63,7 +67,7 @@ async function main() {
   console.log("Set in frontend/public/seed/index.html:");
   console.log(`  SEED_CONTRACT_ADDRESS: "${saleAddress}",`);
   console.log(`  WOOD_TOKEN_ADDRESS: "${woodAddress}",`);
-  console.log("(the payment token is read from the sale contract, nothing else to paste)");
+  console.log("(accepted stablecoins are read from the sale contract, nothing else to paste)");
   console.log("==========================================");
 }
 

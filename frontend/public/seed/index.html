@@ -53,6 +53,7 @@
   .amt{display:flex;align-items:center;gap:8px;background:#08100d;border:1px solid var(--line);border-radius:14px;padding:6px 12px}
   .amt input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:24px;font-weight:700;width:100%;padding:8px 0}
   .amt em{font-style:normal;color:var(--mute);font-weight:700}
+  .amt select{background:transparent;border:0;outline:0;color:var(--mute);font-weight:700;font-size:16px}
   .presets{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
   .presets button{flex:1;min-width:64px}
   .alloc{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 14px;padding:14px;border-radius:14px;background:rgba(57,255,143,.06);border:1px solid rgba(57,255,143,.2)}
@@ -103,7 +104,7 @@
     <!-- Left: terminal -->
     <div class="card">
       <h3>Seed Sale Terminal</h3>
-      <p class="sub">Hard cap $7,500 USDC. Payment in USDC only.</p>
+      <p class="sub">Hard cap $7,500. Pay in USDG or USDC (each counted as $1).</p>
 
       <div class="row"><span>Total raised</span><span class="mono"><b id="raised">$0.00</b> / $7,500.00</span></div>
       <div class="bar"><i id="progress"></i></div>
@@ -116,8 +117,8 @@
         <div class="stat"><small>Max / wallet</small><b>$200</b></div>
       </div>
 
-      <label class="lbl" for="amount">Deposit amount (USDC, $10 – $200 per wallet)</label>
-      <div class="amt"><input id="amount" type="number" inputmode="decimal" min="10" max="200" step="1" value="50"><em>USDC</em></div>
+      <label class="lbl" for="amount">Deposit amount (USD, $10 – $200 per wallet)</label>
+      <div class="amt"><input id="amount" type="number" inputmode="decimal" min="10" max="200" step="1" value="50"><select id="payTok" aria-label="Payment token"><option value="">USDG</option><option value="">USDC</option></select></div>
       <div class="presets">
         <button class="btn" data-p="10">$10 Min</button>
         <button class="btn" data-p="50">$50</button>
@@ -140,7 +141,7 @@
       <div class="card">
         <h3>Your Seed Allocation</h3>
         <p class="sub" id="walletLine">Wallet: not connected</p>
-        <div class="row"><span>Contributed</span><span class="mono" id="myContrib">$0.00 USDC</span></div>
+        <div class="row"><span>Contributed</span><span class="mono" id="myContrib">$0.00</span></div>
         <div class="row"><span>Allocated</span><span class="mono" id="myAlloc">0 $WOOD</span></div>
         <div class="row"><span>Claimed</span><span class="mono" id="myClaimed">0 $WOOD</span></div>
         <div class="row"><span>Unlocked</span><span class="mono" id="unlockedPct">0%</span></div>
@@ -219,30 +220,34 @@ const CONFIG = {
   SEED_PRICE_USD: 0.0075,
   SEED_CONTRACT_ADDRESS: "",   // e.g. "0x…" WoodSeedSale
   WOOD_TOKEN_ADDRESS: "",      // optional, for display
-  /* payment token is read from the sale contract's paymentToken() so it can never mismatch */
+  /* accepted stablecoins are read from the sale contract (acceptedTokens) so they can never mismatch */
 };
 
 const SALE_ABI = [
-  "function paymentToken() view returns (address)",
+  "function acceptedTokensLength() view returns (uint256)",
+  "function acceptedTokens(uint256) view returns (address)",
   "function totalRaised() view returns (uint256)",
   "function saleFinalized() view returns (bool)",
   "function unlockedBps() view returns (uint256)",
   "function participants(address) view returns (uint256 totalContributed,uint256 totalAllocated,uint256 totalClaimed)",
   "function getClaimableAmount(address) view returns (uint256)",
-  "function buyTokens(uint256 usdcAmount)",
+  "function buyTokens(address token, uint256 usdcAmount)",
   "function claimTokens()"
 ];
 const ERC20_ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address,address) view returns (uint256)",
   "function approve(address,uint256) returns (bool)",
-  "function decimals() view returns (uint8)"
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)"
 ];
 
 const MIN = 10, MAX = 200, CAP = 7500, USDC_DEC = 6;
 const $ = (id) => document.getElementById(id);
 const live = /^0x[0-9a-fA-F]{40}$/.test(CONFIG.SEED_CONTRACT_ADDRESS);
 let provider, signer, account, sale, usdc, payToken;
+let tokens = []; // [{addr, sym}]
+const sym = () => (tokens.find((t) => t.addr === payToken) || {}).sym || "USD";
 let state = { raised: 0, finalized: false, bps: 0, contributed: 0, allocated: 0n, claimed: 0n, claimable: 0n, bal: 0, allowance: 0n };
 
 const fmtUsd = (n) => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -271,14 +276,14 @@ function validate() {
   if (newTotal < MIN) return { ok: false, why: `Minimum total is $${MIN}` };
   if (newTotal > MAX) return { ok: false, why: `Max $${MAX} per wallet (you can add $${(MAX - state.contributed).toFixed(2)} more)` };
   if (state.raised + v > CAP) return { ok: false, why: "Exceeds hard cap" };
-  if (state.bal < v) return { ok: false, why: "Not enough USDC in wallet" };
+  if (state.bal < v) return { ok: false, why: `Not enough ${sym()} in wallet` };
   return { ok: true };
 }
 
 function render() {
   $("raised").textContent = fmtUsd(state.raised);
   $("progress").style.width = Math.min(100, (state.raised / CAP) * 100) + "%";
-  $("myContrib").textContent = fmtUsd(state.contributed) + " USDC";
+  $("myContrib").textContent = fmtUsd(state.contributed);
   $("myAlloc").textContent = fmtWood(state.allocated) + " $WOOD";
   $("myClaimed").textContent = fmtWood(state.claimed) + " $WOOD";
   $("unlockedPct").textContent = state.bps / 100 + "%";
@@ -292,7 +297,7 @@ function render() {
   const v = validate();
   const need = account && live && !state.finalized && v.ok && state.allowance < BigInt(Math.round((parseFloat($("amount").value) || 0) * 10 ** USDC_DEC));
   $("buyBtn").disabled = !v.ok;
-  $("buyBtn").textContent = v.ok ? (need ? "Approve USDC" : `Contribute $${parseFloat($("amount").value)} USDC`) : v.why;
+  $("buyBtn").textContent = v.ok ? (need ? `Approve ${sym()}` : `Contribute $${parseFloat($("amount").value)} in ${sym()}`) : v.why;
   $("notLive").classList.toggle("hidden", live);
   $("tickState").innerHTML = "STATUS: <b>" + (!live ? "Not open yet" : state.finalized ? "Sale closed" : "Open") + "</b>";
 }
@@ -347,13 +352,28 @@ async function connect() {
     $("netDot").className = "dot on";
     if (live) {
       sale = new ethers.Contract(CONFIG.SEED_CONTRACT_ADDRESS, SALE_ABI, signer);
-      payToken = await sale.paymentToken();
+      const n = Number(await sale.acceptedTokensLength());
+      tokens = [];
+      for (let i = 0; i < n; i++) {
+        const addr = await sale.acceptedTokens(i);
+        const sy = await new ethers.Contract(addr, ERC20_ABI, signer).symbol();
+        tokens.push({ addr, sym: sy });
+      }
+      $("payTok").innerHTML = tokens.map((t) => `<option value="${t.addr}">${t.sym}</option>`).join("");
+      payToken = tokens[0].addr;
       usdc = new ethers.Contract(payToken, ERC20_ABI, signer);
     }
     setMsg("");
     await refreshWallet();
   } catch (e) { setMsg(e.shortMessage || e.message || "Connection failed", "err"); }
 }
+
+$("payTok").addEventListener("change", async () => {
+  if (!live || !signer || !$("payTok").value) return;
+  payToken = $("payTok").value;
+  usdc = new ethers.Contract(payToken, ERC20_ABI, signer);
+  await refreshWallet();
+});
 
 async function buy() {
   const v = validate(); if (!v.ok) return;
@@ -362,14 +382,14 @@ async function buy() {
   try {
     await ensureChain();
     if (state.allowance < amt) {
-      setMsg("Approve USDC in your wallet…");
+      setMsg(`Approve ${sym()} in your wallet…`);
       const tx = await usdc.approve(CONFIG.SEED_CONTRACT_ADDRESS, amt);
       await tx.wait();
       setMsg("Approved. Now confirm the contribution.", "ok");
       await refreshWallet(); return;
     }
     setMsg("Confirm the contribution in your wallet…");
-    const tx = await sale.buyTokens(amt);
+    const tx = await sale.buyTokens(payToken, amt);
     setMsg("Waiting for confirmation…");
     const rc = await tx.wait();
     setMsg("Contribution confirmed. Tx " + short(rc.hash), "ok");

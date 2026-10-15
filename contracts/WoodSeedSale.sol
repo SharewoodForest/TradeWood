@@ -15,7 +15,9 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable woodToken;
-    IERC20 public immutable paymentToken; // e.g., USDC (6 decimals)
+    // Accepted stablecoins (all must be 6 decimals, treated as $1). Fixed at deploy.
+    address[] public acceptedTokens;
+    mapping(address => bool) public isAccepted;
 
     uint256 public constant MIN_CONTRIBUTION = 10 * 1e6;       // $10
     uint256 public constant MAX_CONTRIBUTION = 200 * 1e6;      // $200
@@ -35,21 +37,32 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
 
     mapping(address => Participant) public participants;
 
-    event TokensPurchased(address indexed buyer, uint256 paymentAmount, uint256 woodAmount);
+    event TokensPurchased(address indexed buyer, address indexed token, uint256 paymentAmount, uint256 woodAmount);
     event SaleFinalized(uint256 totalRaised, uint256 totalTokens);
     event MilestoneUnlocked(uint256 newUnlockedBps);
     event TokensClaimed(address indexed participant, uint256 amount);
 
     constructor(
         address _woodToken,
-        address _paymentToken,
+        address[] memory _paymentTokens,
         address _initialOwner
     ) Ownable(_initialOwner) {
+        require(_paymentTokens.length > 0, "No payment tokens");
         woodToken = IERC20(_woodToken);
-        paymentToken = IERC20(_paymentToken);
+        for (uint256 i = 0; i < _paymentTokens.length; i++) {
+            address t = _paymentTokens[i];
+            require(t != address(0) && !isAccepted[t], "Bad payment token");
+            isAccepted[t] = true;
+            acceptedTokens.push(t);
+        }
     }
 
-    function buyTokens(uint256 usdcAmount) external nonReentrant {
+    function acceptedTokensLength() external view returns (uint256) {
+        return acceptedTokens.length;
+    }
+
+    function buyTokens(address token, uint256 usdcAmount) external nonReentrant {
+        require(isAccepted[token], "Token not accepted");
         require(!saleFinalized, "Sale has closed");
         require(usdcAmount > 0, "Amount must be > 0");
 
@@ -67,9 +80,9 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
         totalRaised += usdcAmount;
         totalTokensAllocated += woodAmount;
 
-        paymentToken.safeTransferFrom(msg.sender, address(this), usdcAmount);
+        IERC20(token).safeTransferFrom(msg.sender, address(this), usdcAmount);
 
-        emit TokensPurchased(msg.sender, usdcAmount, woodAmount);
+        emit TokensPurchased(msg.sender, token, usdcAmount, woodAmount);
     }
 
     function finalizeSale(address treasury) external onlyOwner {
@@ -78,8 +91,11 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
 
         saleFinalized = true;
 
-        uint256 balance = paymentToken.balanceOf(address(this));
-        paymentToken.safeTransfer(treasury, balance);
+        for (uint256 i = 0; i < acceptedTokens.length; i++) {
+            IERC20 t = IERC20(acceptedTokens[i]);
+            uint256 balance = t.balanceOf(address(this));
+            if (balance > 0) t.safeTransfer(treasury, balance);
+        }
 
         emit SaleFinalized(totalRaised, totalTokensAllocated);
     }
