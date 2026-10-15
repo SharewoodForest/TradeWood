@@ -11,6 +11,7 @@ export const NAV = [
   { href: "/bounty-bandits/", label: "Bounty Bandits", icon: "fa-solid fa-mask", tone: "text-sherwoodGold" },
   { href: "/quests/", label: "Quests", icon: "fa-solid fa-scroll", tone: "text-amber-400" },
   { href: "/analytics/", label: "Analytics", icon: "fa-solid fa-chart-line", tone: "" },
+  { href: "/seed/", label: "$WOOD Seed", icon: "fa-solid fa-seedling", tone: "text-sherwoodGold" },
   { href: "/docs/", label: "Docs", icon: "fa-solid fa-book-open", tone: "" },
 ];
 

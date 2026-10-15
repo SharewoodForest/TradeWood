@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$WOOD Seed Round | TradeWood</title>
+<meta name="description" content="TradeWood community seed round for $WOOD on Robinhood Chain. $10 minimum, $200 per wallet, milestone-vested.">
+<style>
+  :root{
+    --bg:#050807; --panel:#0b1210; --panel2:#0f1a16; --line:rgba(52,211,153,.14);
+    --green:#39ff8f; --emerald:#34d399; --gold:#e0b341; --goldlight:#f3d37a;
+    --text:#e6efe9; --mute:#8aa196; --bad:#f87171;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  body{background:radial-gradient(1200px 600px at 80% -10%,rgba(57,255,143,.08),transparent 60%),radial-gradient(900px 500px at -10% 10%,rgba(224,179,65,.07),transparent 60%),var(--bg);min-height:100vh}
+  a{color:var(--emerald);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .ticker{border-bottom:1px solid var(--line);font-size:11px;color:var(--mute);padding:8px 0;letter-spacing:.04em}
+  .ticker .wrap{display:flex;gap:18px;flex-wrap:wrap}
+  .ticker b{color:var(--goldlight);font-weight:600}
+  header.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 0;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;color:var(--text)}
+  .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--green),#0b7a46);display:grid;place-items:center;font-weight:800;color:#03150c}
+  .brand h1{font-size:16px;margin:0} .brand p{margin:0;font-size:11px;color:var(--mute)}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;cursor:pointer;transition:.15s}
+  .btn:hover:not(:disabled){border-color:var(--emerald)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.primary{background:linear-gradient(135deg,var(--green),#18c06a);color:#03150c;border-color:transparent;width:100%;padding:14px;font-size:15px}
+  .btn.gold{background:linear-gradient(135deg,var(--gold),#b8861a);color:#1a1203;border-color:transparent;width:100%}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--mute)} .dot.on{background:var(--green);box-shadow:0 0 8px var(--green)} .dot.warn{background:var(--gold)}
+  .hero{text-align:center;padding:28px 0 8px}
+  .hero h2{font-size:clamp(28px,5vw,46px);margin:12px 0 10px;letter-spacing:-.02em}
+  .hero h2 span{background:linear-gradient(90deg,var(--green),var(--goldlight));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{max-width:640px;margin:0 auto;color:var(--mute);line-height:1.6}
+  .banner{margin:22px 0 0;padding:14px 16px;border-radius:14px;border:1px solid rgba(224,179,65,.35);background:rgba(224,179,65,.08);color:var(--goldlight);font-size:13px;line-height:1.5}
+  .grid{display:grid;grid-template-columns:1fr;gap:20px;margin:26px 0}
+  @media(min-width:900px){.grid{grid-template-columns:7fr 5fr}}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:20px;padding:22px}
+  .card h3{margin:0 0 4px;font-size:17px} .sub{color:var(--mute);font-size:12px;margin:0 0 16px}
+  .bar{height:12px;border-radius:99px;background:#0a120f;border:1px solid var(--line);overflow:hidden;margin:10px 0}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--emerald),var(--green));transition:width .5s}
+  .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+  .row:last-child{border:0} .row span:first-child{color:var(--mute)}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+  @media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
+  .stat{background:#08100d;border:1px solid var(--line);border-radius:14px;padding:12px}
+  .stat small{display:block;color:var(--mute);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+  .stat b{font-size:17px}
+  label.lbl{display:block;font-size:12px;color:var(--mute);margin:14px 0 6px}
+  .amt{display:flex;align-items:center;gap:8px;background:#08100d;border:1px solid var(--line);border-radius:14px;padding:6px 12px}
+  .amt input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:24px;font-weight:700;width:100%;padding:8px 0}
+  .amt em{font-style:normal;color:var(--mute);font-weight:700}
+  .presets{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+  .presets button{flex:1;min-width:64px}
+  .alloc{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 14px;padding:14px;border-radius:14px;background:rgba(57,255,143,.06);border:1px solid rgba(57,255,143,.2)}
+  .alloc b{font-size:22px;color:var(--green)}
+  .check{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--mute);line-height:1.5;margin:14px 0}
+  .check input{margin-top:3px;accent-color:#39ff8f}
+  .msg{margin-top:12px;font-size:12px;min-height:16px;word-break:break-word} .msg.err{color:var(--bad)} .msg.ok{color:var(--green)}
+  .tranche{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+  .tranche:last-child{border:0}
+  .num{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:13px;background:#0a120f;border:1px solid var(--line);color:var(--mute)}
+  .tranche.done .num{background:var(--green);color:#03150c;border-color:transparent}
+  .tranche h4{margin:0;font-size:14px} .tranche p{margin:3px 0 0;font-size:12px;color:var(--mute);line-height:1.5}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  td{padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.05)} td:last-child{text-align:right;font-family:ui-monospace,Menlo,monospace}
+  .risks{font-size:12px;color:var(--mute);line-height:1.7;padding-left:18px;margin:0}
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;font-size:12px;color:var(--mute);text-align:center;line-height:1.7}
+  footer nav{display:flex;gap:18px;justify-content:center;margin-bottom:10px;flex-wrap:wrap}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="ticker"><div class="wrap">
+  <span>NETWORK: Robinhood Chain · ID 4663</span>
+  <span>ROUND: Community Seed (1,000,000 $WOOD)</span>
+  <span>SEED RATE: <b>$0.0075</b></span>
+  <span id="tickState">STATUS: <b>Checking…</b></span>
+</div></div>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><span class="logo">W</span><span><h1>TradeWood Seed Round</h1><p>The Sherwood Protocol</p></span></a>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <a class="btn" href="/">Return to Exchange</a>
+      <span class="pill"><span class="dot" id="netDot"></span><span id="netLabel">Robinhood Chain (4663)</span></span>
+      <button class="btn" id="connectBtn">Connect Wallet</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="pill"><span class="dot warn"></span> Pre-listing community seed sale</span>
+    <h2>Bootstrap the <span>$WOOD</span> Protocol</h2>
+    <p>Seed round contributions fund the initial $WOOD liquidity and platform operations for tradewood.app on Robinhood Chain. Capped per wallet, and tokens are released in four milestone tranches after the sale closes.</p>
+    <div class="banner" id="notLive">This round is not open yet. The sale contract has not been deployed, so contributions are disabled. Figures below are the planned terms.</div>
+  </section>
+
+  <div class="grid">
+    <!-- Left: terminal -->
+    <div class="card">
+      <h3>Seed Sale Terminal</h3>
+      <p class="sub">Hard cap $7,500 USDC. Payment in USDC only.</p>
+
+      <div class="row"><span>Total raised</span><span class="mono"><b id="raised">$0.00</b> / $7,500.00</span></div>
+      <div class="bar"><i id="progress"></i></div>
+      <div class="row"><span>Tokens in round</span><span class="mono">1,000,000 $WOOD (1.0% of supply)</span></div>
+
+      <div class="stats">
+        <div class="stat"><small>Seed price</small><b>$0.0075</b></div>
+        <div class="stat"><small>Listing target</small><b>$0.0100</b></div>
+        <div class="stat"><small>Min</small><b>$10</b></div>
+        <div class="stat"><small>Max / wallet</small><b>$200</b></div>
+      </div>
+
+      <label class="lbl" for="amount">Deposit amount (USDC, $10 – $200 per wallet)</label>
+      <div class="amt"><input id="amount" type="number" inputmode="decimal" min="10" max="200" step="1" value="50"><em>USDC</em></div>
+      <div class="presets">
+        <button class="btn" data-p="10">$10 Min</button>
+        <button class="btn" data-p="50">$50</button>
+        <button class="btn" data-p="100">$100</button>
+        <button class="btn" data-p="200">$200 Max</button>
+      </div>
+
+      <div class="alloc"><span style="color:var(--mute);font-size:12px">Allocated $WOOD<br>at $0.0075 seed price</span><b id="allocOut">6,666 $WOOD</b></div>
+
+      <label class="check"><input type="checkbox" id="agree">
+        <span>I have read the risks below. I am not in a region where this sale is restricted, I understand $WOOD is a speculative token, tokens are vested and may take months or never fully unlock if milestones slip, and this is not financial advice.</span></label>
+
+      <button class="btn primary" id="buyBtn" disabled>Connect wallet to contribute</button>
+      <div class="msg" id="msg"></div>
+      <p class="sub" style="margin-top:12px">The contract enforces a $200 maximum per wallet (not per person) and the $7,500 hard cap. Contributions are not refundable by the contract.</p>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="card">
+        <h3>Your Seed Allocation</h3>
+        <p class="sub" id="walletLine">Wallet: not connected</p>
+        <div class="row"><span>Contributed</span><span class="mono" id="myContrib">$0.00 USDC</span></div>
+        <div class="row"><span>Allocated</span><span class="mono" id="myAlloc">0 $WOOD</span></div>
+        <div class="row"><span>Claimed</span><span class="mono" id="myClaimed">0 $WOOD</span></div>
+        <div class="row"><span>Unlocked</span><span class="mono" id="unlockedPct">0%</span></div>
+        <div style="margin-top:14px"><button class="btn gold" id="claimBtn" disabled>Claim 0 $WOOD (unlocks post-close)</button></div>
+      </div>
+
+      <div class="card">
+        <h3>Milestone Vesting</h3>
+        <p class="sub">4 tranches of 25%. Unlocked by the team when each milestone ships.</p>
+        <div class="tranche" data-t="2500"><span class="num">1</span><div><h4>Tranche 1 · 25% · Liquidity Pool Launch</h4><p>Released when the $WOOD trading pool launches (TGE).</p></div></div>
+        <div class="tranche" data-t="5000"><span class="num">2</span><div><h4>Tranche 2 · 25% · Staking &amp; Yield Vaults Live</h4><p>Released when yield vaults deploy on tradewood.app.</p></div></div>
+        <div class="tranche" data-t="7500"><span class="num">3</span><div><h4>Tranche 3 · 25% · Sherwood AMM Routing</h4><p>Released on multi-pair routing activation.</p></div></div>
+        <div class="tranche" data-t="10000"><span class="num">4</span><div><h4>Tranche 4 · 25% · Full Decentralization</h4><p>Released on protocol handover and DAO staking.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:0">
+    <div class="card">
+      <h3>Where the money goes</h3>
+      <p class="sub">Planned use of $7,500 raised. Treasury actions are made by the team, not enforced by the sale contract.</p>
+      <table>
+        <tr><td>Initial DEX liquidity (75–80%)</td><td>$5,625 – $6,000</td></tr>
+        <tr><td>Operations: hosting, RPC, quests (20–25%)</td><td>$1,500 – $1,875</td></tr>
+        <tr><td>Planned pairing at $0.01</td><td>562,500 – 600,000 $WOOD</td></tr>
+      </table>
+      <p class="sub" style="margin-top:12px">LP tokens are planned to be burned or locked. This is a commitment by the team, not something the sale contract does automatically.</p>
+    </div>
+    <div class="card">
+      <h3>$WOOD at a glance</h3>
+      <p class="sub">Fixed supply: 100,000,000 $WOOD (18 decimals).</p>
+      <table>
+        <tr><td>Community seed</td><td>1.0%</td></tr>
+        <tr><td>DEX liquidity reserve</td><td>10.0%</td></tr>
+        <tr><td>Staking &amp; yield vaults</td><td>35.0%</td></tr>
+        <tr><td>Bounty Bandits &amp; quests</td><td>25.0%</td></tr>
+        <tr><td>Protocol treasury</td><td>15.0%</td></tr>
+        <tr><td>Team &amp; founders (vested)</td><td>14.0%</td></tr>
+      </table>
+      <p class="sub" style="margin-top:12px">Trading: 3% on DEX buys and sells (2% auto-liquidity, 1% treasury), 0% on wallet transfers. Launch limits: 1% max transaction, 2% max wallet.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Risks</h3>
+    <ul class="risks">
+      <li>$WOOD has no guaranteed value or listing price. The $0.0100 figure is a planning target, not a prediction or promise.</li>
+      <li>The smart contracts are unaudited unless an audit is published on the docs page. You can lose everything you contribute.</li>
+      <li>Tokens unlock only when the team marks a milestone as reached. Delays are possible.</li>
+      <li>The sale may be unavailable in some jurisdictions. Do not participate if it is restricted where you live.</li>
+      <li>TradeWood is an independent project and is not affiliated with or endorsed by Robinhood Markets.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <nav>
+      <a href="/">Exchange</a>
+      <a href="/docs/">Docs</a>
+      <a href="https://github.com/SharewoodForest/TradeWood" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noopener">Explorer</a>
+    </nav>
+    TradeWood ($WOOD) · The Sherwood Protocol on Robinhood Chain<br>
+    Independent and not affiliated with Robinhood Markets. Nothing here is financial advice.<br>
+    The sale contract address is shown here once deployed, and the round is verified on-chain before finalization.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<script>
+/* ───────── CONFIG: fill these after deployment (public addresses only, never keys) ───────── */
+const CONFIG = {
+  CHAIN_ID: 4663,
+  CHAIN_HEX: "0x1237",
+  RPC_URL: "https://rpc.mainnet.chain.robinhood.com",
+  EXPLORER: "https://robinhoodchain.blockscout.com",
+  SEED_PRICE_USD: 0.0075,
+  SEED_CONTRACT_ADDRESS: "",   // e.g. "0x…" WoodSeedSale
+  WOOD_TOKEN_ADDRESS: "",      // optional, for display
+  /* payment token is read from the sale contract's paymentToken() so it can never mismatch */
+};
+
+const SALE_ABI = [
+  "function paymentToken() view returns (address)",
+  "function totalRaised() view returns (uint256)",
+  "function saleFinalized() view returns (bool)",
+  "function unlockedBps() view returns (uint256)",
+  "function participants(address) view returns (uint256 totalContributed,uint256 totalAllocated,uint256 totalClaimed)",
+  "function getClaimableAmount(address) view returns (uint256)",
+  "function buyTokens(uint256 usdcAmount)",
+  "function claimTokens()"
+];
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address,address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)",
+  "function decimals() view returns (uint8)"
+];
+
+const MIN = 10, MAX = 200, CAP = 7500, USDC_DEC = 6;
+const $ = (id) => document.getElementById(id);
+const live = /^0x[0-9a-fA-F]{40}$/.test(CONFIG.SEED_CONTRACT_ADDRESS);
+let provider, signer, account, sale, usdc, payToken;
+let state = { raised: 0, finalized: false, bps: 0, contributed: 0, allocated: 0n, claimed: 0n, claimable: 0n, bal: 0, allowance: 0n };
+
+const fmtUsd = (n) => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtWood = (wei) => Number(ethers.formatUnits(wei, 18)).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const usdToWood = (usd) => usd / CONFIG.SEED_PRICE_USD;
+const setMsg = (t, cls = "") => { $("msg").textContent = t; $("msg").className = "msg " + cls; };
+const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+
+function renderAlloc() {
+  const v = parseFloat($("amount").value) || 0;
+  $("allocOut").textContent = Math.floor(usdToWood(v)).toLocaleString("en-US") + " $WOOD";
+}
+
+function remainingForWallet() {
+  return Math.max(0, Math.min(MAX - state.contributed, CAP - state.raised));
+}
+
+function validate() {
+  const v = parseFloat($("amount").value);
+  if (!live) return { ok: false, why: "Sale contract not deployed yet" };
+  if (state.finalized) return { ok: false, why: "Sale closed" };
+  if (!account) return { ok: false, why: "Connect wallet to contribute" };
+  if (!$("agree").checked) return { ok: false, why: "Accept the risk acknowledgement" };
+  if (!(v > 0)) return { ok: false, why: "Enter an amount" };
+  const newTotal = state.contributed + v;
+  if (newTotal < MIN) return { ok: false, why: `Minimum total is $${MIN}` };
+  if (newTotal > MAX) return { ok: false, why: `Max $${MAX} per wallet (you can add $${(MAX - state.contributed).toFixed(2)} more)` };
+  if (state.raised + v > CAP) return { ok: false, why: "Exceeds hard cap" };
+  if (state.bal < v) return { ok: false, why: "Not enough USDC in wallet" };
+  return { ok: true };
+}
+
+function render() {
+  $("raised").textContent = fmtUsd(state.raised);
+  $("progress").style.width = Math.min(100, (state.raised / CAP) * 100) + "%";
+  $("myContrib").textContent = fmtUsd(state.contributed) + " USDC";
+  $("myAlloc").textContent = fmtWood(state.allocated) + " $WOOD";
+  $("myClaimed").textContent = fmtWood(state.claimed) + " $WOOD";
+  $("unlockedPct").textContent = state.bps / 100 + "%";
+  document.querySelectorAll(".tranche").forEach((el) => el.classList.toggle("done", state.bps >= Number(el.dataset.t)));
+  const c = state.claimable;
+  $("claimBtn").disabled = !(account && state.finalized && c > 0n);
+  $("claimBtn").textContent = c > 0n ? `Claim ${fmtWood(c)} $WOOD` : state.finalized ? "Nothing to claim right now" : "Claim 0 $WOOD (unlocks post-close)";
+  $("walletLine").textContent = account ? "Wallet: " + short(account) : "Wallet: not connected";
+  $("connectBtn").textContent = account ? short(account) : "Connect Wallet";
+
+  const v = validate();
+  const need = account && live && !state.finalized && v.ok && state.allowance < BigInt(Math.round((parseFloat($("amount").value) || 0) * 10 ** USDC_DEC));
+  $("buyBtn").disabled = !v.ok;
+  $("buyBtn").textContent = v.ok ? (need ? "Approve USDC" : `Contribute $${parseFloat($("amount").value)} USDC`) : v.why;
+  $("notLive").classList.toggle("hidden", live);
+  $("tickState").innerHTML = "STATUS: <b>" + (!live ? "Not open yet" : state.finalized ? "Sale closed" : "Open") + "</b>";
+}
+
+async function readPublic() {
+  if (!live) return render();
+  try {
+    const rp = new ethers.JsonRpcProvider(CONFIG.RPC_URL, CONFIG.CHAIN_ID);
+    const s = new ethers.Contract(CONFIG.SEED_CONTRACT_ADDRESS, SALE_ABI, rp);
+    const [raised, fin, bps] = await Promise.all([s.totalRaised(), s.saleFinalized(), s.unlockedBps()]);
+    state.raised = Number(ethers.formatUnits(raised, USDC_DEC));
+    state.finalized = fin; state.bps = Number(bps);
+  } catch (e) { setMsg("Could not read the sale contract. Try again shortly.", "err"); }
+  render();
+}
+
+async function refreshWallet() {
+  if (!account || !live) return render();
+  try {
+    const [p, claimable, bal, allow] = await Promise.all([
+      sale.participants(account), sale.getClaimableAmount(account), usdc.balanceOf(account), usdc.allowance(account, CONFIG.SEED_CONTRACT_ADDRESS)
+    ]);
+    state.contributed = Number(ethers.formatUnits(p.totalContributed, USDC_DEC));
+    state.allocated = p.totalAllocated; state.claimed = p.totalClaimed; state.claimable = claimable;
+    state.bal = Number(ethers.formatUnits(bal, USDC_DEC)); state.allowance = allow;
+  } catch (e) { setMsg("Could not read your position.", "err"); }
+  render();
+}
+
+async function ensureChain() {
+  const cur = await window.ethereum.request({ method: "eth_chainId" });
+  if (cur.toLowerCase() === CONFIG.CHAIN_HEX) return;
+  try {
+    await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CONFIG.CHAIN_HEX }] });
+  } catch (e) {
+    if (e.code === 4902 || (e.data && e.data.originalError && e.data.originalError.code === 4902)) {
+      await window.ethereum.request({ method: "wallet_addEthereumChain", params: [{
+        chainId: CONFIG.CHAIN_HEX, chainName: "Robinhood Chain", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        rpcUrls: [CONFIG.RPC_URL], blockExplorerUrls: [CONFIG.EXPLORER] }] });
+    } else throw e;
+  }
+}
+
+async function connect() {
+  if (!window.ethereum) { setMsg("No browser wallet found. Open this page in a wallet browser or install an extension.", "err"); return; }
+  try {
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    await ensureChain();
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    account = await signer.getAddress();
+    $("netDot").className = "dot on";
+    if (live) {
+      sale = new ethers.Contract(CONFIG.SEED_CONTRACT_ADDRESS, SALE_ABI, signer);
+      payToken = await sale.paymentToken();
+      usdc = new ethers.Contract(payToken, ERC20_ABI, signer);
+    }
+    setMsg("");
+    await refreshWallet();
+  } catch (e) { setMsg(e.shortMessage || e.message || "Connection failed", "err"); }
+}
+
+async function buy() {
+  const v = validate(); if (!v.ok) return;
+  const amt = BigInt(Math.round(parseFloat($("amount").value) * 10 ** USDC_DEC));
+  $("buyBtn").disabled = true;
+  try {
+    await ensureChain();
+    if (state.allowance < amt) {
+      setMsg("Approve USDC in your wallet…");
+      const tx = await usdc.approve(CONFIG.SEED_CONTRACT_ADDRESS, amt);
+      await tx.wait();
+      setMsg("Approved. Now confirm the contribution.", "ok");
+      await refreshWallet(); return;
+    }
+    setMsg("Confirm the contribution in your wallet…");
+    const tx = await sale.buyTokens(amt);
+    setMsg("Waiting for confirmation…");
+    const rc = await tx.wait();
+    setMsg("Contribution confirmed. Tx " + short(rc.hash), "ok");
+    await readPublic(); await refreshWallet();
+  } catch (e) { setMsg(e.reason || e.shortMessage || e.message || "Transaction failed", "err"); render(); }
+}
+
+async function claim() {
+  $("claimBtn").disabled = true;
+  try {
+    await ensureChain();
+    const tx = await sale.claimTokens(); await tx.wait();
+    setMsg("Claimed.", "ok"); await refreshWallet();
+  } catch (e) { setMsg(e.reason || e.shortMessage || e.message || "Claim failed", "err"); render(); }
+}
+
+$("connectBtn").onclick = connect;
+$("buyBtn").onclick = buy;
+$("claimBtn").onclick = claim;
+$("agree").onchange = render;
+$("amount").oninput = () => { renderAlloc(); render(); };
+document.querySelectorAll("[data-p]").forEach((b) => b.onclick = () => { $("amount").value = b.dataset.p; renderAlloc(); render(); });
+if (window.ethereum) {
+  window.ethereum.on?.("accountsChanged", () => location.reload());
+  window.ethereum.on?.("chainChanged", () => location.reload());
+}
+renderAlloc(); render(); readPublic(); setInterval(readPublic, 30000);
+</script>
+</body>
+</html>
