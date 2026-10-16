@@ -7,6 +7,21 @@ export function ExchangeView() {
   const s = useSwapState();
   return (
     <>
+      <a
+        href="/seed/"
+        className="group mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-sherwoodGold/40 bg-gradient-to-r from-neonGreen/10 to-sherwoodGold/10 px-5 py-4 hover:border-sherwoodGold transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <i className="fa-solid fa-seedling text-sherwoodGold text-xl" />
+          <div>
+            <p className="font-display font-bold text-white">The $WOOD seed round is open</p>
+            <p className="text-xs text-slate-300">$0.0075 per WOOD · $10 minimum · $200 per wallet. Early supporters will be rewarded.</p>
+          </div>
+        </div>
+        <span className="shrink-0 rounded-xl bg-sherwoodGold px-4 py-2 text-sm font-bold text-forestDark group-hover:brightness-110">
+          Join the seed round <i className="fa-solid fa-arrow-right ml-1" />
+        </span>
+      </a>
       <PageHero
         pill="Best-route DEX on Robinhood Chain"
         pillIcon="fa-shield-halved"

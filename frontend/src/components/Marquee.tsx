@@ -17,7 +17,7 @@ export function Marquee() {
       <Item label="ETH / USDG" value={ethPrice ? `$${ethPrice.toLocaleString("en-US", { maximumFractionDigits: 2 })}` : "—"} tone="text-neonGreen" />
       <Item label="BLOCK" value={block ? `#${block.toLocaleString("en-US")}` : "—"} />
       <Item label="GAS" value={gas ? `${Number(formatGwei(gas)).toFixed(4)} gwei (ETH)` : "—"} tone="text-emeraldGlow" />
-      <Item label="$WOOD" value="Launching soon" tone="text-goldLight" />
+      <Item label="$WOOD SEED ROUND" value="Open now · tradewood.app/seed" tone="text-goldLight" />
       <Item dot label="SHERWOOD ROUTER" value="Uniswap V2 + V3 + V4 split-route engine" />
     </>
   );

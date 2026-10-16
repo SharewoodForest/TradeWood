@@ -10,6 +10,7 @@ export function Footer() {
           <span>· The Sherwood Protocol on Robinhood Chain</span>
         </div>
         <div className="flex items-center gap-5 font-mono">
+          <a href="/seed/" className="text-goldLight hover:text-neonGreen">$WOOD Seed</a>
           <Link href="/docs/" className="hover:text-neonGreen">Docs</Link>
           <a href="https://github.com/SharewoodForest/TradeWood" target="_blank" rel="noreferrer" className="hover:text-neonGreen">
             <i className="fa-brands fa-github" /> GitHub

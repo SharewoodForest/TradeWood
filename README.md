@@ -2,6 +2,9 @@
 
 **The Sherwood Protocol on Robinhood Chain.** $WOOD token, Forest Exchange, yield vaults, Bounty Bandits referrals and quests.
 
+**$WOOD seed round is open: [tradewood.app/seed](https://tradewood.app/seed/)** · $0.0075 per WOOD, $10 min, $200 per wallet, paid in USDG on Robinhood Chain. Early supporters will be rewarded.
+WoodToken `0x92FC190e5ABAcc1D246C316aCC0EE283682b25fD` · WoodSeedSale `0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79`
+
 > Agents and contributors: read [`.context/project-state.md`](.context/project-state.md) first. It's the source of truth.
 
 ## Layout

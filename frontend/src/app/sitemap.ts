@@ -9,7 +9,7 @@ const PAGES: { path: string; priority: number; changeFrequency: "daily" | "weekl
   { path: "/bounty-bandits/", priority: 0.8, changeFrequency: "weekly" },
   { path: "/quests/", priority: 0.7, changeFrequency: "weekly" },
   { path: "/analytics/", priority: 0.6, changeFrequency: "weekly" },
-  { path: "/seed/", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/seed/", priority: 0.9, changeFrequency: "daily" },
   { path: "/docs/", priority: 0.7, changeFrequency: "monthly" },
 ];
 
