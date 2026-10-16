@@ -116,6 +116,26 @@ describe("WoodSeedSale", () => {
     await expect(sale.addAcceptedToken(await usdg.getAddress())).to.be.revertedWith("Sale has closed");
   });
 
+  it("owner recovers only the unsold WOOD; backers' allocations stay protected", async () => {
+    const f = await loadFixture(fixture);
+    const { sale, alice, usdg, treasury, wood } = f;
+    const G = await usdg.getAddress();
+    await wire(f);
+    await sale.connect(alice).buyTokens(G, U(100)); // 13,333.33 WOOD owed
+    await expect(sale.recoverUnsoldWood(treasury.address)).to.be.revertedWith("Sale must be finalized first");
+    await sale.finalizeSale(treasury.address);
+    const before = await wood.balanceOf(treasury.address);
+    await sale.recoverUnsoldWood(treasury.address);
+    const owed = (await sale.participants(alice.address)).totalAllocated;
+    expect(await wood.balanceOf(await sale.getAddress())).to.equal(owed);
+    expect((await wood.balanceOf(treasury.address)) - before).to.equal(SEED - owed);
+    await expect(sale.recoverUnsoldWood(treasury.address)).to.be.revertedWith("Nothing to recover");
+    await sale.setUnlockedBps(2500);
+    await sale.connect(alice).claimTokens();
+    await expect(sale.recoverUnsoldWood(treasury.address)).to.be.revertedWith("Nothing to recover");
+    expect(await sale.totalTokensClaimed()).to.equal((owed * 2500n) / 10000n);
+  });
+
   describe("finalize needs the WOOD", () => {
     it("reverts without WOOD, then succeeds once the sale is funded", async () => {
       const f = await loadFixture(fixture);

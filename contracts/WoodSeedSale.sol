@@ -29,6 +29,7 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
 
     uint256 public totalRaised;
     uint256 public totalTokensAllocated;
+    uint256 public totalTokensClaimed;
     bool public saleFinalized;
     uint256 public unlockedBps; // 10000 = 100%, 2500 = 25%
 
@@ -45,6 +46,7 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
     event SaleFinalized(uint256 totalRaised, uint256 totalTokens);
     event MilestoneUnlocked(uint256 newUnlockedBps);
     event TokensClaimed(address indexed participant, uint256 amount);
+    event UnsoldRecovered(address indexed to, uint256 amount);
 
     constructor(
         address _woodToken,
@@ -127,6 +129,18 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
         emit SaleFinalized(totalRaised, totalTokensAllocated);
     }
 
+    /// @notice After the sale closes, send WOOD nobody bought to `to`. Backers' unclaimed allocations stay locked in.
+    function recoverUnsoldWood(address to) external onlyOwner {
+        require(saleFinalized, "Sale must be finalized first");
+        require(to != address(0), "Zero address");
+        uint256 owed = totalTokensAllocated - totalTokensClaimed;
+        uint256 bal = woodToken.balanceOf(address(this));
+        require(bal > owed, "Nothing to recover");
+        uint256 amount = bal - owed;
+        woodToken.safeTransfer(to, amount);
+        emit UnsoldRecovered(to, amount);
+    }
+
     function setUnlockedBps(uint256 _bps) external onlyOwner {
         require(saleFinalized, "Sale must be finalized first");
         require(_bps >= unlockedBps, "Cannot reduce unlocked percentage");
@@ -152,6 +166,7 @@ contract WoodSeedSale is Ownable, ReentrancyGuard {
         require(claimable > 0, "No tokens available to claim");
 
         participants[msg.sender].totalClaimed += claimable;
+        totalTokensClaimed += claimable;
         woodToken.safeTransfer(msg.sender, claimable);
 
         emit TokensClaimed(msg.sender, claimable);
