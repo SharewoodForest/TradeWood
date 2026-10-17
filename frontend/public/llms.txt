@@ -21,5 +21,6 @@
 - Site: https://tradewood.app/
 - Seed round: https://tradewood.app/seed/
 - Docs: https://tradewood.app/docs/
+- Community (Telegram): https://t.me/TradeWoodApp
 - Code: https://github.com/SharewoodForest/TradeWood
 - Explorer: https://robinhoodchain.blockscout.com

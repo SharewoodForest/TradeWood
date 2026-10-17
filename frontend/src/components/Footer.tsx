@@ -15,6 +15,9 @@ export function Footer() {
           <a href="https://github.com/SharewoodForest/TradeWood" target="_blank" rel="noreferrer" className="hover:text-neonGreen">
             <i className="fa-brands fa-github" /> GitHub
           </a>
+          <a href="https://t.me/TradeWoodApp" target="_blank" rel="noreferrer" className="hover:text-neonGreen">
+            <i className="fa-brands fa-telegram" /> Telegram
+          </a>
           <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noreferrer" className="hover:text-neonGreen">Explorer</a>
         </div>
       </div>
