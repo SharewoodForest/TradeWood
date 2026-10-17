@@ -1,0 +1,25 @@
+# TradeWood
+
+> TradeWood (The Sherwood Protocol) is an independent DeFi app on Robinhood Chain (chain ID 4663). It quotes every Uniswap V2, V3 and V4 pool, routes swaps to the best price, and can split large trades across pools. It is not affiliated with or endorsed by Robinhood Markets.
+
+## $WOOD community seed round
+- Status: open at https://tradewood.app/seed/ (pre-listing, trading not enabled).
+- Round: 1,000,000 $WOOD (1% of the fixed 100,000,000 supply) at $0.0075 each, paid in USDG (counted as $1).
+- Limits, enforced on-chain: $10 minimum, $200 maximum per wallet, $7,500 hard cap.
+- Tokens unlock in four 25% milestone tranches after the sale closes. Contributions are not refundable by the contract.
+- Planned (not guaranteed): $0.0100 listing target; 3% DEX tax (2% auto-liquidity, 1% treasury); 1% max transaction and 2% max wallet at launch.
+- Risk: $WOOD has no guaranteed value. Automated analysis has been done; an independent manual audit has not been completed. The sale may not be available in every jurisdiction. Nothing here is financial advice.
+
+## Contracts (Robinhood Chain, 4663)
+- WoodToken: 0x92FC190e5ABAcc1D246C316aCC0EE283682b25fD
+- WoodSeedSale: 0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79
+- USDG: 0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168
+- Treasury Safe (2-of-3, owns both contracts): 0xcE96e912A799d46FD28Ea2b3752296d58af70BAb
+- Both contracts are source-verified on Sourcify and Blockscout.
+
+## Links
+- Site: https://tradewood.app/
+- Seed round: https://tradewood.app/seed/
+- Docs: https://tradewood.app/docs/
+- Code: https://github.com/SharewoodForest/TradeWood
+- Explorer: https://robinhoodchain.blockscout.com
