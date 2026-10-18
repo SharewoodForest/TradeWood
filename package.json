@@ -7,7 +7,8 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:testnet": "hardhat run scripts/deploy.js --network robinhoodTestnet",
-    "deploy:mainnet": "hardhat run scripts/deploy.js --network robinhood"
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network robinhood",
+    "deploy:router": "hardhat run scripts/deploy-router.js --network robinhood"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
