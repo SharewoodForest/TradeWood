@@ -15,6 +15,7 @@ export default function Quests() {
     <div className="space-y-8">
       <PageHero gold pill="Bounty Board" pillIcon="fa-scroll" title="Sherwood Quest Board"
         sub="Complete on-chain tasks to earn Bounty Points. Points convert to $WOOD at the end of each 14-day epoch and unlock Founding Outlaw whitelist spots." />
+      <p className="text-xs text-slate-400 text-center max-w-2xl mx-auto">Bounty Points quests are planned and not live yet. Partner campaign platforms can see the actions that are verifiable on-chain today on the <a className="text-neonGreen hover:underline" href="/campaign/">campaign page</a>; TradeWood does not promise rewards.</p>
       <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
         {QUESTS.map((q) => (
           <div key={q.t} className="glass-card rounded-3xl p-5 flex gap-4 items-start hover:border-emeraldGlow/40 transition-all">

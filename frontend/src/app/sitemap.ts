@@ -11,6 +11,7 @@ const PAGES: { path: string; priority: number; changeFrequency: "daily" | "weekl
   { path: "/analytics/", priority: 0.6, changeFrequency: "weekly" },
   { path: "/seed/", priority: 0.9, changeFrequency: "daily" },
   { path: "/docs/", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/campaign/", priority: 0.5, changeFrequency: "weekly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

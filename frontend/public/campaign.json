@@ -1,0 +1,85 @@
+{
+  "name": "TradeWood (The Sherwood Protocol)",
+  "site": "https://tradewood.app/",
+  "campaignPage": "https://tradewood.app/campaign/",
+  "chain": {
+    "name": "Robinhood Chain",
+    "chainId": 4663,
+    "rpc": "https://rpc.mainnet.chain.robinhood.com",
+    "explorer": "https://robinhoodchain.blockscout.com"
+  },
+  "disclaimer": "TradeWood is independent and not affiliated with or endorsed by Robinhood Markets, Inc. TradeWood does not promise any reward, amount or value. Reward terms, eligibility and distribution are set solely by the campaign operator. $WOOD has no guaranteed value. Nothing here is financial advice. Automated analysis has been done; an independent manual audit has not been completed.",
+  "contracts": {
+    "WoodToken": "0x92FC190e5ABAcc1D246C316aCC0EE283682b25fD",
+    "WoodSeedSale": "0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79",
+    "USDG": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+    "SherwoodRouter": null
+  },
+  "actions": [
+    {
+      "id": "seed-contribute-10",
+      "title": "Contribute at least $10 in the $WOOD community seed sale",
+      "status": "live",
+      "verification": "onchain-call",
+      "contract": "0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79",
+      "call": "participants(address) returns (uint256 totalContributed, uint256 totalAllocated, uint256 totalClaimed)",
+      "selector": "0x09e69ede",
+      "condition": "totalContributed >= 10000000",
+      "notes": "totalContributed uses 6 decimals (10000000 = $10). The sale enforces $10 minimum and $200 maximum per wallet, USDG only."
+    },
+    {
+      "id": "seed-purchase-event",
+      "title": "Seed sale purchase event",
+      "status": "live",
+      "verification": "onchain-event",
+      "contract": "0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79",
+      "event": "TokensPurchased(address indexed buyer, address indexed token, uint256 paymentAmount, uint256 woodAmount)",
+      "topic0": "0x6faf93231a456e552dbc9961f58d9713ee4f2e69d15f1975b050ef0911053a7b",
+      "notes": "buyer is topic1. paymentAmount uses the payment token's decimals (USDG = 6)."
+    },
+    {
+      "id": "seed-claim",
+      "title": "Claim unlocked $WOOD from the seed sale",
+      "status": "later",
+      "verification": "onchain-event",
+      "contract": "0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79",
+      "event": "TokensClaimed(address indexed participant, uint256 amount)",
+      "topic0": "0x896e034966eaaf1adc54acc0f257056febbd300c9e47182cf761982cf1f5e430",
+      "notes": "Only possible after the sale is finalized and the owner unlocks a milestone (MilestoneUnlocked(uint256 newUnlockedBps), topic0 0xf474f87806baca4eae88818e5b2f0790521557148b3ca1b56bd6a56d7111c1ae)."
+    },
+    {
+      "id": "swap-via-router",
+      "title": "Make a swap through the Sherwood Router",
+      "status": "after-router-launch",
+      "verification": "onchain-event",
+      "contract": null,
+      "event": "SherwoodSwap(address indexed user, address indexed referrer, address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOut, uint256 feeAmount, address recipient, uint8 venueMask, uint8 legs)",
+      "topic0": "0xe24c9cfc852b2ab02065935fb3e44173e766a7dee50580a58ae10990dae029f9",
+      "notes": "Available only once the SherwoodRouter is deployed; the contract address will be published here. user is topic1. Size a swap in USD from amountIn/amountOut and the token's decimals."
+    },
+    {
+      "id": "referral-swap",
+      "title": "Refer a user whose swap goes through the Sherwood Router",
+      "status": "after-router-launch",
+      "verification": "onchain-event",
+      "event": "SherwoodSwap (referrer is topic2)",
+      "topic0": "0xe24c9cfc852b2ab02065935fb3e44173e766a7dee50580a58ae10990dae029f9",
+      "referralLink": "https://tradewood.app/?ref=<address>",
+      "notes": "The site captures ?ref=<address> and passes it as the referrer argument."
+    },
+    {
+      "id": "join-telegram",
+      "title": "Join the community Telegram group",
+      "status": "live",
+      "verification": "offchain-platform",
+      "url": "https://t.me/TradeWoodApp"
+    },
+    {
+      "id": "visit-seed-page",
+      "title": "Visit the seed sale page",
+      "status": "live",
+      "verification": "offchain-platform",
+      "url": "https://tradewood.app/seed/"
+    }
+  ]
+}
