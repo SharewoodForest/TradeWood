@@ -66,7 +66,11 @@ interface IPoolManagerLike {
 ///      the best total output. This contract enforces the user's minimum output *after* the fee across all legs,
 ///      handles native ETH/WETH on every venue (V4 pools can hold native ETH), and measures outputs by balance deltas.
 ///      Fee-on-transfer tokens like $WOOD must route through V2 only: V3 and V4 revert on taxed *input* (their
-///      payment checks require the full amount to arrive). It holds no funds between transactions.
+///      payment checks require the full amount to arrive). That only holds for pools the token actually taxes, so
+///      WoodToken's owner registers every WOOD V2 pair / V3 pool address and the V4 PoolManager as AMM pairs
+///      (scripts/register-amm-pools.js); the frontend also marks WOOD as V2-only. Each leg runs with a 0 minimum
+///      but the swap reverts unless the combined output meets the user's minAmountOut, so a bad leg can't lose
+///      more than the user's own slippage limit. It holds no funds between transactions.
 contract SherwoodRouter is Ownable2Step, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 

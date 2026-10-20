@@ -2,13 +2,15 @@
   "name": "tradewood",
   "version": "0.1.0",
   "private": true,
-  "description": "TradeWood ($WOOD) — The Sherwood Protocol on Robinhood Chain",
+  "description": "TradeWood ($WOOD) \u2014 The Sherwood Protocol on Robinhood Chain",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:testnet": "hardhat run scripts/deploy.js --network robinhoodTestnet",
     "deploy:mainnet": "hardhat run scripts/deploy.js --network robinhood",
-    "deploy:router": "hardhat run scripts/deploy-router.js --network robinhood"
+    "deploy:router": "hardhat run scripts/deploy-router.js --network robinhood",
+    "amm:register": "hardhat run scripts/register-amm-pools.js --network robinhood",
+    "fork:amm": "FORK=1 hardhat run scripts/fork-amm-pairs.js"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",

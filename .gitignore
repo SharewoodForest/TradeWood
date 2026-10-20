@@ -8,3 +8,4 @@ out/
 dist/
 .DS_Store
 !.env.example
+safe-batch-*.json
