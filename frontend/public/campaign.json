@@ -13,7 +13,7 @@
     "WoodToken": "0x92FC190e5ABAcc1D246C316aCC0EE283682b25fD",
     "WoodSeedSale": "0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79",
     "USDG": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
-    "SherwoodRouter": null
+    "SherwoodRouter": "0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46"
   },
   "actions": [
     {
@@ -50,22 +50,23 @@
     {
       "id": "swap-via-router",
       "title": "Make a swap through the Sherwood Router",
-      "status": "after-router-launch",
+      "status": "live",
       "verification": "onchain-event",
-      "contract": null,
+      "contract": "0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46",
       "event": "SherwoodSwap(address indexed user, address indexed referrer, address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOut, uint256 feeAmount, address recipient, uint8 venueMask, uint8 legs)",
       "topic0": "0xe24c9cfc852b2ab02065935fb3e44173e766a7dee50580a58ae10990dae029f9",
-      "notes": "Available only once the SherwoodRouter is deployed; the contract address will be published here. user is topic1. Size a swap in USD from amountIn/amountOut and the token's decimals."
+      "notes": "Emitted by the SherwoodRouter. user is topic1. Size a swap in USD from amountIn/amountOut and the token's decimals."
     },
     {
       "id": "referral-swap",
       "title": "Refer a user whose swap goes through the Sherwood Router",
-      "status": "after-router-launch",
+      "status": "live",
       "verification": "onchain-event",
       "event": "SherwoodSwap (referrer is topic2)",
       "topic0": "0xe24c9cfc852b2ab02065935fb3e44173e766a7dee50580a58ae10990dae029f9",
       "referralLink": "https://tradewood.app/?ref=<address>",
-      "notes": "The site captures ?ref=<address> and passes it as the referrer argument."
+      "notes": "The site captures ?ref=<address> and passes it as the referrer argument.",
+      "contract": "0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46"
     },
     {
       "id": "join-telegram",

@@ -5,14 +5,15 @@ import { explorerAddress } from "@/config/chains";
 export const metadata: Metadata = pageMeta("/campaign/", "Campaign verification | TradeWood", "Verifiable TradeWood actions on Robinhood Chain: the exact contract calls and events a rewards platform can check. No rewards are promised by TradeWood.");
 
 const SEED_SALE = "0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79";
+const ROUTER = "0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46";
 
-type Status = "Live now" | "Later" | "After router launch";
+type Status = "Live now" | "Later";
 const ACTIONS: { t: string; status: Status; how: string; detail: string }[] = [
   { t: "Contribute $10+ in the $WOOD seed sale", status: "Live now", how: "On-chain call", detail: "WoodSeedSale.participants(address) returns (totalContributed, totalAllocated, totalClaimed). Eligible when totalContributed >= 10000000 (6 decimals, so 10000000 = $10). Selector 0x09e69ede." },
   { t: "Seed sale purchase", status: "Live now", how: "On-chain event", detail: "TokensPurchased(address indexed buyer, address indexed token, uint256 paymentAmount, uint256 woodAmount), topic0 0x6faf9323…053a7b. The buyer is topic1." },
   { t: "Claim unlocked $WOOD", status: "Later", how: "On-chain event", detail: "TokensClaimed(address indexed participant, uint256 amount) and MilestoneUnlocked(uint256 newUnlockedBps). Only possible after the sale is finalized and a milestone is unlocked." },
-  { t: "Make a swap through the Sherwood Router", status: "After router launch", how: "On-chain event", detail: "SherwoodSwap(user indexed, referrer indexed, tokenIn, tokenOut, amountIn, amountOut, feeAmount, recipient, venueMask, legs), topic0 0xe24c9cfc…29f9. The router address will be published here once it is deployed." },
-  { t: "Refer a swapper", status: "After router launch", how: "On-chain event", detail: "The referrer field of SherwoodSwap (topic2). Referral links look like tradewood.app/?ref=<wallet address>." },
+  { t: "Make a swap through the Sherwood Router", status: "Live now", how: "On-chain event", detail: "SherwoodSwap(user indexed, referrer indexed, tokenIn, tokenOut, amountIn, amountOut, feeAmount, recipient, venueMask, legs), topic0 0xe24c9cfc…29f9. Emitted by the SherwoodRouter at 0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46." },
+  { t: "Refer a swapper", status: "Live now", how: "On-chain event", detail: "The referrer field of SherwoodSwap (topic2). Referral links look like tradewood.app/?ref=<wallet address>." },
   { t: "Join the community Telegram group", status: "Live now", how: "Verified by the platform", detail: "t.me/TradeWoodApp" },
   { t: "Visit the seed sale page", status: "Live now", how: "Verified by the platform", detail: "tradewood.app/seed/" },
 ];
@@ -20,7 +21,6 @@ const ACTIONS: { t: string; status: Status; how: string; detail: string }[] = [
 const TONE: Record<Status, string> = {
   "Live now": "text-neonGreen bg-emeraldGlow/10 border-emeraldGlow/30",
   Later: "text-slate-300 bg-slate-500/10 border-slate-400/30",
-  "After router launch": "text-goldLight bg-sherwoodGold/10 border-sherwoodGold/30",
 };
 
 export default function Campaign() {
@@ -45,7 +45,7 @@ export default function Campaign() {
         <h2 className="font-display font-bold text-white text-lg mb-3">Contracts (Robinhood Chain, 4663)</h2>
         <ul className="space-y-2 text-xs font-mono">
           <li className="flex flex-col sm:flex-row sm:justify-between gap-1"><span className="text-slate-400">WoodSeedSale</span><a href={explorerAddress(SEED_SALE)} target="_blank" rel="noreferrer" className="text-neonGreen hover:underline break-all">{SEED_SALE}</a></li>
-          <li className="flex justify-between text-slate-400"><span>SherwoodRouter</span><span className="text-goldLight">Not deployed yet</span></li>
+          <li className="flex flex-col sm:flex-row sm:justify-between gap-1"><span className="text-slate-400">SherwoodRouter</span><a href={explorerAddress(ROUTER)} target="_blank" rel="noreferrer" className="text-neonGreen hover:underline break-all">{ROUTER}</a></li>
         </ul>
       </section>
     </div>

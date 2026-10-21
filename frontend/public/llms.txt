@@ -8,6 +8,7 @@
 - Limits, enforced on-chain: $10 minimum, $200 maximum per wallet, $7,500 hard cap.
 - Tokens unlock in four 25% milestone tranches after the sale closes. Contributions are held in the sale contract until the treasury Safe (2-of-3 multisig) closes the round, and are not refundable by the contract.
 - Planned (not guaranteed): $0.0100 listing target; 3% DEX tax (2% auto-liquidity, 1% treasury); 1% max transaction and 2% max wallet at launch.
+- Sherwood Router (swaps): 0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46 on Robinhood Chain, owned by the treasury Safe, 0.10% fee, source verified on Sourcify.
 - Risk: $WOOD has no guaranteed value. Automated analysis has been done; an independent manual audit has not been completed. The sale may not be available in every jurisdiction. Nothing here is financial advice.
 
 ## Contracts (Robinhood Chain, 4663)
