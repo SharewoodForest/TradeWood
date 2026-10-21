@@ -50,25 +50,59 @@ export const V4_HOOKED_POOLS: { key: V4PoolKey; label: string }[] = [
 
 export const NATIVE = "0x0000000000000000000000000000000000000000" as const;
 
+export type TokenCategory = "Crypto" | "Stablecoins" | "Stocks" | "Ecosystem";
+
 export type Token = {
   symbol: string;
   name: string;
   address: Address; // NATIVE for ETH
   decimals: number;
-  icon: string; // font-awesome class
+  icon: string; // font-awesome class ("" = show the symbol's first letters)
   tone: string; // tailwind classes for the icon chip
+  category?: TokenCategory;
+  popular?: boolean; // shown as a quick-pick chip
+  usdPegged?: boolean; // ~$1, used for the USD estimate under amounts
+  imported?: boolean; // added by the user from a pasted address (not on our list)
   v2Only?: boolean; // WOOD: route through V2 (its pool + tax live there)
 };
 
+const st = (symbol: string, name: string, address: string, popular = false): Token => ({
+  symbol, name: `${name} • Robinhood Token`, address: getAddress(address), decimals: 18, icon: "fa-solid fa-chart-line",
+  tone: "bg-emerald-500/15 text-emerald-300", category: "Stocks", popular,
+});
+
+/**
+ * Listed tokens. Every address was checked on Robinhood Chain (code, symbol, decimals) on 2026-10-21, and each
+ * non-core token was bought and sold through the live Sherwood Router on a mainnet fork. Only tokens with a live
+ * Uniswap pool are listed (LINK, PENDLE, 1INCH and SUSHI had none; syrupUSDG's pools
+ * were too thin, ~98% price impact on $50). Stock tokens share one Robinhood proxy beacon.
+ */
 export const TOKENS: Token[] = [
-  { symbol: "ETH", name: "Ether", address: NATIVE, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-indigo-500/20 text-indigo-300" },
-  { symbol: "USDG", name: "Global Dollar", address: USDG, decimals: 6, icon: "fa-solid fa-dollar-sign", tone: "bg-blue-500/20 text-blue-300" },
-  { symbol: "WETH", name: "Wrapped Ether", address: WETH, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-slate-500/20 text-slate-300" },
+  { symbol: "ETH", name: "Ether", address: NATIVE, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-indigo-500/20 text-indigo-300", category: "Crypto", popular: true },
+  { symbol: "USDG", name: "Global Dollar", address: USDG, decimals: 6, icon: "fa-solid fa-dollar-sign", tone: "bg-blue-500/20 text-blue-300", category: "Stablecoins", popular: true, usdPegged: true },
+  { symbol: "WETH", name: "Wrapped Ether", address: WETH, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-slate-500/20 text-slate-300", category: "Crypto" },
   ...(WOOD_TOKEN
-    ? [{ symbol: "WOOD", name: "TradeWood", address: WOOD_TOKEN, decimals: 18, icon: "fa-solid fa-tree", tone: "bg-neonGreen/20 text-neonGreen", v2Only: true }]
+    ? [{ symbol: "WOOD", name: "TradeWood", address: WOOD_TOKEN, decimals: 18, icon: "fa-solid fa-tree", tone: "bg-neonGreen/20 text-neonGreen", category: "Ecosystem" as const, popular: true, v2Only: true }]
     : []),
-  // Stock tokens: add verified addresses from docs.robinhood.com/chain/contracts (Stock Tokens table) here.
+  // Robinhood stock tokens
+  st("NVDA", "NVIDIA", "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec", true),
+  st("SPY", "SPDR S&P 500 ETF", "0x117cc2133c37b721f49de2a7a74833232b3b4c0c", true),
+  st("AAPL", "Apple", "0xaF3D76f1834A1d425780943C99Ea8A608f8a93f9"),
+  st("TSLA", "Tesla", "0x322F0929c4625eD5bAd873c95208D54E1c003b2d"),
+  // Crypto
+  { symbol: "cbBTC", name: "Coinbase Wrapped BTC", address: getAddress("0xCEC185eB182c47d1bA1EFc84e6959e18cd620Be4"), decimals: 8, icon: "fa-brands fa-bitcoin", tone: "bg-orange-500/20 text-orange-300", category: "Crypto", popular: true },
+  { symbol: "VIRTUAL", name: "Virtuals Protocol", address: getAddress("0xc6911796042b15d7Fa4F6CDe69e245DdCd3d9c31"), decimals: 18, icon: "fa-solid fa-robot", tone: "bg-violet-500/20 text-violet-300", category: "Crypto" },
+  // Stablecoins
+  { symbol: "USDe", name: "Ethena USDe", address: getAddress("0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34"), decimals: 18, icon: "fa-solid fa-dollar-sign", tone: "bg-slate-500/20 text-slate-200", category: "Stablecoins", usdPegged: true },
+  { symbol: "UUSD", name: "Unity USD", address: getAddress("0x61a10E8556BEd032eA176330e7F17D6a12a10000"), decimals: 18, icon: "fa-solid fa-dollar-sign", tone: "bg-teal-500/20 text-teal-300", category: "Stablecoins", usdPegged: true },
+  // Ecosystem
+  { symbol: "CASHCAT", name: "Cash Cat", address: getAddress("0x020bfC650A365f8BB26819deAAbF3E21291018b4"), decimals: 18, icon: "fa-solid fa-cat", tone: "bg-yellow-500/20 text-yellow-300", category: "Ecosystem", popular: true },
+  { symbol: "PONS", name: "Pons", address: getAddress("0x39dBED3a2bd333467115dE45665cC57F813C4571"), decimals: 18, icon: "fa-solid fa-bridge", tone: "bg-purple-500/20 text-purple-300", category: "Ecosystem" },
+  { symbol: "PENGU", name: "Pudgy Penguins", address: getAddress("0x74BE72AFFAFbC8de30F0C11247814036314D625f"), decimals: 18, icon: "fa-solid fa-snowflake", tone: "bg-sky-500/20 text-sky-300", category: "Ecosystem" },
 ];
+
+/** $WOOD before launch: shown in the picker as a link to the seed sale (it can't be swapped until trading opens). */
+export const WOOD_SEED = { symbol: "WOOD", name: "TradeWood • seed sale open", address: getAddress("0x92FC190e5ABAcc1D246C316aCC0EE283682b25fD"), href: "/seed/" };
 
 // ── ABIs (minimal, hand-written from contracts/ and project-state §2) ──
 export const erc20Abi = parseAbi([

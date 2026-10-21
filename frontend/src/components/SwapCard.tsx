@@ -53,7 +53,7 @@ export function SwapCard({ s }: { s: SwapState }) {
   const usd = (t: Token, v?: bigint) => {
     if (v === undefined || v === 0n) return undefined;
     const n = Number(formatUnits(v, t.decimals));
-    if (t.symbol === "USDG") return n;
+    if (t.usdPegged) return n;
     if ((t.symbol === "ETH" || t.symbol === "WETH") && ethPrice) return n * ethPrice;
     return undefined;
   };
