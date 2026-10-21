@@ -168,9 +168,8 @@ export function TokenModal({ open, onClose, onSelect, exclude }: { open: boolean
               href={WOOD_SEED.href}
               className="w-full flex items-center gap-3 p-3 rounded-2xl bg-panelCard/60 hover:bg-panelHover border border-sherwoodGold/30 hover:border-sherwoodGold/60 transition-all text-left"
             >
-              <span className="w-9 h-9 rounded-full flex items-center justify-center bg-neonGreen/20 text-neonGreen shrink-0">
-                <i className="fa-solid fa-tree" />
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-mark.png" alt="" className="w-9 h-9 rounded-full object-cover shrink-0 bg-neonGreen/10" />
               <div className="min-w-0">
                 <p className="font-bold text-white text-sm font-mono">WOOD</p>
                 <p className="text-xs text-slate-400 truncate">{WOOD_SEED.name}</p>

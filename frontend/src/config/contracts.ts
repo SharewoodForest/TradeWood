@@ -57,7 +57,8 @@ export type Token = {
   name: string;
   address: Address; // NATIVE for ETH
   decimals: number;
-  icon: string; // font-awesome class ("" = show the symbol's first letters)
+  icon: string; // font-awesome class ("" = show the symbol's first letters); fallback if the logo fails
+  logo?: string; // /tokens/<file>.png (self-hosted)
   tone: string; // tailwind classes for the icon chip
   category?: TokenCategory;
   popular?: boolean; // shown as a quick-pick chip
@@ -67,7 +68,7 @@ export type Token = {
 };
 
 const st = (symbol: string, name: string, address: string, popular = false): Token => ({
-  symbol, name: `${name} • Robinhood Token`, address: getAddress(address), decimals: 18, icon: "fa-solid fa-chart-line",
+  symbol, name: `${name} • Robinhood Token`, address: getAddress(address), decimals: 18, icon: "fa-solid fa-chart-line", logo: `/tokens/${symbol.toLowerCase()}.png`,
   tone: "bg-emerald-500/15 text-emerald-300", category: "Stocks", popular,
 });
 
@@ -78,11 +79,11 @@ const st = (symbol: string, name: string, address: string, popular = false): Tok
  * were too thin, ~98% price impact on $50). Stock tokens share one Robinhood proxy beacon.
  */
 export const TOKENS: Token[] = [
-  { symbol: "ETH", name: "Ether", address: NATIVE, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-indigo-500/20 text-indigo-300", category: "Crypto", popular: true },
-  { symbol: "USDG", name: "Global Dollar", address: USDG, decimals: 6, icon: "fa-solid fa-dollar-sign", tone: "bg-blue-500/20 text-blue-300", category: "Stablecoins", popular: true, usdPegged: true },
-  { symbol: "WETH", name: "Wrapped Ether", address: WETH, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-slate-500/20 text-slate-300", category: "Crypto" },
+  { symbol: "ETH", logo: "/tokens/eth.png", name: "Ether", address: NATIVE, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-indigo-500/20 text-indigo-300", category: "Crypto", popular: true },
+  { symbol: "USDG", logo: "/tokens/usdg.png", name: "Global Dollar", address: USDG, decimals: 6, icon: "fa-solid fa-dollar-sign", tone: "bg-blue-500/20 text-blue-300", category: "Stablecoins", popular: true, usdPegged: true },
+  { symbol: "WETH", logo: "/tokens/weth.png", name: "Wrapped Ether", address: WETH, decimals: 18, icon: "fa-brands fa-ethereum", tone: "bg-slate-500/20 text-slate-300", category: "Crypto" },
   ...(WOOD_TOKEN
-    ? [{ symbol: "WOOD", name: "TradeWood", address: WOOD_TOKEN, decimals: 18, icon: "fa-solid fa-tree", tone: "bg-neonGreen/20 text-neonGreen", category: "Ecosystem" as const, popular: true, v2Only: true }]
+    ? [{ symbol: "WOOD", logo: "/logo-mark.png", name: "TradeWood", address: WOOD_TOKEN, decimals: 18, icon: "fa-solid fa-tree", tone: "bg-neonGreen/20 text-neonGreen", category: "Ecosystem" as const, popular: true, v2Only: true }]
     : []),
   // Robinhood stock tokens
   st("NVDA", "NVIDIA", "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec", true),
@@ -90,15 +91,15 @@ export const TOKENS: Token[] = [
   st("AAPL", "Apple", "0xaF3D76f1834A1d425780943C99Ea8A608f8a93f9"),
   st("TSLA", "Tesla", "0x322F0929c4625eD5bAd873c95208D54E1c003b2d"),
   // Crypto
-  { symbol: "cbBTC", name: "Coinbase Wrapped BTC", address: getAddress("0xCEC185eB182c47d1bA1EFc84e6959e18cd620Be4"), decimals: 8, icon: "fa-brands fa-bitcoin", tone: "bg-orange-500/20 text-orange-300", category: "Crypto", popular: true },
-  { symbol: "VIRTUAL", name: "Virtuals Protocol", address: getAddress("0xc6911796042b15d7Fa4F6CDe69e245DdCd3d9c31"), decimals: 18, icon: "fa-solid fa-robot", tone: "bg-violet-500/20 text-violet-300", category: "Crypto" },
+  { symbol: "cbBTC", logo: "/tokens/cbbtc.png", name: "Coinbase Wrapped BTC", address: getAddress("0xCEC185eB182c47d1bA1EFc84e6959e18cd620Be4"), decimals: 8, icon: "fa-brands fa-bitcoin", tone: "bg-orange-500/20 text-orange-300", category: "Crypto", popular: true },
+  { symbol: "VIRTUAL", logo: "/tokens/virtual.png", name: "Virtuals Protocol", address: getAddress("0xc6911796042b15d7Fa4F6CDe69e245DdCd3d9c31"), decimals: 18, icon: "fa-solid fa-robot", tone: "bg-violet-500/20 text-violet-300", category: "Crypto" },
   // Stablecoins
-  { symbol: "USDe", name: "Ethena USDe", address: getAddress("0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34"), decimals: 18, icon: "fa-solid fa-dollar-sign", tone: "bg-slate-500/20 text-slate-200", category: "Stablecoins", usdPegged: true },
-  { symbol: "UUSD", name: "Unity USD", address: getAddress("0x61a10E8556BEd032eA176330e7F17D6a12a10000"), decimals: 18, icon: "fa-solid fa-dollar-sign", tone: "bg-teal-500/20 text-teal-300", category: "Stablecoins", usdPegged: true },
+  { symbol: "USDe", logo: "/tokens/usde.png", name: "Ethena USDe", address: getAddress("0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34"), decimals: 18, icon: "fa-solid fa-dollar-sign", tone: "bg-slate-500/20 text-slate-200", category: "Stablecoins", usdPegged: true },
+  { symbol: "UUSD", logo: "/tokens/uusd.png", name: "Unity USD", address: getAddress("0x61a10E8556BEd032eA176330e7F17D6a12a10000"), decimals: 18, icon: "fa-solid fa-dollar-sign", tone: "bg-teal-500/20 text-teal-300", category: "Stablecoins", usdPegged: true },
   // Ecosystem
-  { symbol: "CASHCAT", name: "Cash Cat", address: getAddress("0x020bfC650A365f8BB26819deAAbF3E21291018b4"), decimals: 18, icon: "fa-solid fa-cat", tone: "bg-yellow-500/20 text-yellow-300", category: "Ecosystem", popular: true },
-  { symbol: "PONS", name: "Pons", address: getAddress("0x39dBED3a2bd333467115dE45665cC57F813C4571"), decimals: 18, icon: "fa-solid fa-bridge", tone: "bg-purple-500/20 text-purple-300", category: "Ecosystem" },
-  { symbol: "PENGU", name: "Pudgy Penguins", address: getAddress("0x74BE72AFFAFbC8de30F0C11247814036314D625f"), decimals: 18, icon: "fa-solid fa-snowflake", tone: "bg-sky-500/20 text-sky-300", category: "Ecosystem" },
+  { symbol: "CASHCAT", logo: "/tokens/cashcat.png", name: "Cash Cat", address: getAddress("0x020bfC650A365f8BB26819deAAbF3E21291018b4"), decimals: 18, icon: "fa-solid fa-cat", tone: "bg-yellow-500/20 text-yellow-300", category: "Ecosystem", popular: true },
+  { symbol: "PONS", logo: "/tokens/pons.png", name: "Pons", address: getAddress("0x39dBED3a2bd333467115dE45665cC57F813C4571"), decimals: 18, icon: "fa-solid fa-bridge", tone: "bg-purple-500/20 text-purple-300", category: "Ecosystem" },
+  { symbol: "PENGU", logo: "/tokens/pengu.png", name: "Pudgy Penguins", address: getAddress("0x74BE72AFFAFbC8de30F0C11247814036314D625f"), decimals: 18, icon: "fa-solid fa-snowflake", tone: "bg-sky-500/20 text-sky-300", category: "Ecosystem" },
 ];
 
 /** $WOOD before launch: shown in the picker as a link to the seed sale (it can't be swapped until trading opens). */
