@@ -1,8 +1,9 @@
 {
-  // TradeWood static site on Cloudflare Workers (static assets, no server code).
+  // TradeWood on Cloudflare Workers: the static site (./out) plus a small read-only agent API for /api/* (worker/index.ts).
   // Workers Builds: root directory = frontend, build = `npm ci --legacy-peer-deps && npm run build`, deploy = `npx wrangler deploy`.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tradewood",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-09-01",
   "routes": [
     { "pattern": "tradewood.app", "custom_domain": true },
@@ -10,7 +11,24 @@
   ],
   "assets": {
     "directory": "./out",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
-  }
+    "not_found_handling": "404-page",
+    // Only /api/* runs the Worker; every other path is served straight from the static files, as before.
+    "run_worker_first": ["/api/*", "/api"]
+  },
+  // The Worker shares src/config with the site. Next inlines these NEXT_PUBLIC_* values at build time; the Worker
+  // bundle gets the same values here. scripts/check-env-sync.mjs (run by `npm run build`) fails if they drift from
+  // .env.production.
+  "define": {
+    "process.env.NEXT_PUBLIC_SHERWOOD_ROUTER": "\"0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46\"",
+    "process.env.NEXT_PUBLIC_WOOD_TOKEN": "undefined",
+    "process.env.NEXT_PUBLIC_RPC_URL": "undefined",
+    "process.env.NEXT_PUBLIC_TESTNET_RPC_URL": "undefined"
+  },
+  "vars": {
+    "SHERWOOD_ROUTER": "0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46",
+    "SEED_SALE": "0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79"
+  },
+  "observability": { "enabled": true }
 }

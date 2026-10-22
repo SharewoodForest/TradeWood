@@ -11,12 +11,23 @@
 - Sherwood Router (swaps): 0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46 on Robinhood Chain, owned by the treasury Safe, 0.10% fee, source verified on Sourcify.
 - Risk: $WOOD has no guaranteed value. Automated analysis has been done; an independent manual audit has not been completed. The sale may not be available in every jurisdiction. Nothing here is financial advice.
 
+## For AI agents and bots
+- Agent guide: https://tradewood.app/agents.md
+- Read-only API (no key; returns unsigned transactions your wallet signs): https://tradewood.app/api
+  - Swap quote + transactions: GET https://tradewood.app/api/quote?tokenIn=ETH&tokenOut=USDG&amount=0.01&from=<wallet>
+  - Seed sale status + buy transactions: GET https://tradewood.app/api/seed?wallet=<wallet>&amountUsd=50
+  - Token list: https://tradewood.app/api/tokens
+- OpenAPI: https://tradewood.app/openapi.json
+- ABIs: https://tradewood.app/abi/SherwoodRouter.json, https://tradewood.app/abi/WoodSeedSale.json, https://tradewood.app/abi/WoodToken.json
+- Only contribute to the seed sale for a user who has read the terms and explicitly asked to.
+
 ## Contracts (Robinhood Chain, 4663)
+- SherwoodRouter (swaps): 0x0b93Fb1d8be0EdcA90a7cC3Aea58e6460FE1eB46
 - WoodToken: 0x92FC190e5ABAcc1D246C316aCC0EE283682b25fD
 - WoodSeedSale: 0x560De388b7F6e4b7D7DAAacE8c16a304da98fE79
 - USDG: 0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168
-- Treasury Safe (2-of-3, owns both contracts): 0xcE96e912A799d46FD28Ea2b3752296d58af70BAb
-- Both contracts are source-verified on Sourcify and Blockscout.
+- Treasury Safe (2-of-3, owns all three contracts): 0xcE96e912A799d46FD28Ea2b3752296d58af70BAb
+- WoodToken and WoodSeedSale are source-verified on Sourcify and Blockscout; SherwoodRouter on Sourcify.
 
 ## Links
 - Site: https://tradewood.app/

@@ -1,0 +1,108 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TradeWood agent API",
+    "version": "1.0.0",
+    "description": "Read-only API for AI agents and bots on Robinhood Chain (chain ID 4663). Quotes swaps across Uniswap V2/V3/V4 via the Sherwood Router and the $WOOD seed sale, and returns unsigned transactions that the caller's own wallet signs and sends. No API key. Guide: https://tradewood.app/agents.md",
+    "contact": { "url": "https://t.me/TradeWoodApp" }
+  },
+  "servers": [{ "url": "https://tradewood.app" }],
+  "paths": {
+    "/api": {
+      "get": { "operationId": "index", "summary": "Endpoints, contract addresses and doc links", "responses": { "200": { "description": "Index", "content": { "application/json": { "schema": { "type": "object" } } } } } }
+    },
+    "/api/tokens": {
+      "get": { "operationId": "listTokens", "summary": "Listed tokens on Robinhood Chain (Uniswap token-list format). Use \"ETH\" for native ether.", "responses": { "200": { "description": "Token list", "content": { "application/json": { "schema": { "type": "object" } } } } } }
+    },
+    "/api/quote": {
+      "get": {
+        "operationId": "quoteSwap",
+        "summary": "Best route for a swap plus ready-to-sign approve/swap transactions",
+        "description": "Send the returned transactions in order from `from`. An approve step (exact amount) appears only when the router's allowance is too low; wait for it to confirm before sending the swap. The swap reverts if output < minOut or after deadline. Re-quote if more than ~1 minute passes.",
+        "parameters": [
+          { "name": "tokenIn", "in": "query", "required": true, "schema": { "type": "string" }, "description": "\"ETH\", a listed symbol (e.g. USDG, NVDA, cbBTC) or a token address", "example": "ETH" },
+          { "name": "tokenOut", "in": "query", "required": true, "schema": { "type": "string" }, "example": "USDG" },
+          { "name": "amount", "in": "query", "schema": { "type": "string" }, "description": "Input amount in token units (decimal). Give this or amountIn.", "example": "0.01" },
+          { "name": "amountIn", "in": "query", "schema": { "type": "string", "pattern": "^\\d+$" }, "description": "Input amount in integer base units" },
+          { "name": "from", "in": "query", "schema": { "type": "string" }, "description": "Sender wallet. Needed for transactions, balance/allowance checks and gas estimate." },
+          { "name": "recipient", "in": "query", "schema": { "type": "string" }, "description": "Receives the output. Defaults to from." },
+          { "name": "slippageBps", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 50 } },
+          { "name": "deadlineSec", "in": "query", "schema": { "type": "integer", "minimum": 60, "maximum": 3600, "default": 1200 } },
+          { "name": "referrer", "in": "query", "schema": { "type": "string" }, "description": "Bounty Bandits referrer address (recorded in the SherwoodSwap event)" },
+          { "name": "allowUnlisted", "in": "query", "schema": { "type": "boolean", "default": false }, "description": "Allow token addresses not on TradeWood's list. Verify the address first." }
+        ],
+        "responses": {
+          "200": { "description": "Quote", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Quote" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "502": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/seed": {
+      "get": {
+        "operationId": "seedSale",
+        "summary": "$WOOD seed sale status, terms, a wallet's position and approve/buy/claim transactions",
+        "description": "Only contribute for a user who has read `terms` and `disclosures` and explicitly asked to contribute a specific amount. Send approve (exact USDG), wait for confirmation, then buy.",
+        "parameters": [
+          { "name": "wallet", "in": "query", "schema": { "type": "string" }, "description": "Wallet to report on and build transactions for" },
+          { "name": "amountUsd", "in": "query", "schema": { "type": "string" }, "description": "Contribution in USD (paid in USDG): $10 minimum total, $200 per wallet", "example": "50" }
+        ],
+        "responses": {
+          "200": { "description": "Seed sale", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "502": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Transaction": {
+        "type": "object",
+        "required": ["step", "chainId", "to", "value", "data"],
+        "properties": {
+          "step": { "type": "string", "enum": ["approve", "swap", "buy", "claim"] },
+          "description": { "type": "string" },
+          "chainId": { "type": "integer", "const": 4663 },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "value": { "type": "string", "description": "wei, decimal string" },
+          "data": { "type": "string" }
+        }
+      },
+      "Quote": {
+        "type": "object",
+        "properties": {
+          "chainId": { "type": "integer" },
+          "router": { "type": "string" },
+          "tokenIn": { "type": "object" },
+          "tokenOut": { "type": "object" },
+          "amountIn": { "type": "string" },
+          "expectedOut": { "type": "string" },
+          "expectedOutFormatted": { "type": "string" },
+          "minOut": { "type": "string" },
+          "minOutFormatted": { "type": "string" },
+          "priceImpactPct": { "type": ["number", "null"] },
+          "protocolFee": { "type": "object" },
+          "route": { "type": "object" },
+          "deadline": { "type": "string" },
+          "gasEstimate": { "type": "string" },
+          "warnings": { "type": "array", "items": { "type": "string" } },
+          "transactions": { "type": "array", "items": { "$ref": "#/components/schemas/Transaction" } },
+          "next": { "type": "string" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": { "error": { "type": "object", "properties": { "code": { "type": "string" }, "message": { "type": "string" }, "details": { "type": "object" } } } }
+      }
+    },
+    "responses": {
+      "Error": { "description": "Error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+    }
+  }
+}
