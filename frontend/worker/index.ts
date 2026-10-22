@@ -412,7 +412,9 @@ export default {
     const rpcs = env.RPC_URL ? [env.RPC_URL, ...RPCS] : RPCS;
     const c = createPublicClient({
       chain: robinhoodChain,
-      transport: fallback(rpcs.map((r) => http(r, { timeout: 10_000, retryCount: 1 }))),
+      // Cloudflare allows ~50 outgoing requests per invocation, so JSON-RPC calls are batched into a few HTTP requests.
+      // Robinhood's RPC takes batches of 20; dRPC's free tier only 3.
+      transport: fallback(rpcs.map((r) => http(r, { timeout: 12_000, retryCount: 1, batch: { batchSize: r.includes("drpc.org") ? 3 : 20, wait: 25 } }))),
       batch: { multicall: true },
     }) as PublicClient;
     const path = u.pathname.replace(/\/+$/, "") || "/api";
