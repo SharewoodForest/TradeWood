@@ -17,6 +17,7 @@
   - Swap quote + transactions: GET https://tradewood.app/api/quote?tokenIn=ETH&tokenOut=USDG&amount=0.01&from=<wallet>
   - Seed sale status + buy transactions: GET https://tradewood.app/api/seed?wallet=<wallet>&amountUsd=50
   - Token list: https://tradewood.app/api/tokens
+- MCP server (Streamable HTTP, no key): https://tradewood.app/mcp (tools: get_swap_quote, get_seed_sale, list_tokens)
 - OpenAPI: https://tradewood.app/openapi.json
 - ABIs: https://tradewood.app/abi/SherwoodRouter.json, https://tradewood.app/abi/WoodSeedSale.json, https://tradewood.app/abi/WoodToken.json
 - Only contribute to the seed sale for a user who has read the terms and explicitly asked to.

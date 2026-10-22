@@ -4,12 +4,25 @@ TradeWood (tradewood.app) is a swap router on **Robinhood Chain (chain ID 4663)*
 
 The agent API is read-only and needs no API key. It returns **unsigned transactions** (`to`, `data`, `value`, `chainId`). Your own wallet signs and sends them. TradeWood never holds keys or funds.
 
+- MCP server: https://tradewood.app/mcp
 - API index: https://tradewood.app/api
 - OpenAPI spec: https://tradewood.app/openapi.json
 - Token list: https://tradewood.app/api/tokens (Uniswap token-list format)
 - Health: https://tradewood.app/api/health
 - ABIs: https://tradewood.app/abi/SherwoodRouter.json, /abi/WoodSeedSale.json, /abi/WoodToken.json, /abi/ERC20.json
 - RPC: https://rpc.mainnet.chain.robinhood.com · Explorer: https://robinhoodchain.blockscout.com
+
+## MCP server
+
+TradeWood is also an MCP server (Streamable HTTP, no key): **`https://tradewood.app/mcp`**.
+Add it as a custom connector in Claude (Settings → Connectors → Add custom connector) or in any MCP client.
+
+Tools, all read-only:
+- `get_swap_quote`
+- `get_seed_sale`
+- `list_tokens`
+
+They return the same data as the REST API, including unsigned transactions. A separate wallet tool or the user's wallet signs them.
 
 ## Contracts (Robinhood Chain, 4663)
 

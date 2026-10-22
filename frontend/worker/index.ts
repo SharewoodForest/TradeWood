@@ -8,6 +8,7 @@
  *   GET /api/tokens          listed tokens (Uniswap token-list format)
  *   GET /api/quote           best route + ready-to-sign approve/swap transactions
  *   GET /api/seed            $WOOD seed sale status, a wallet's position, and buy/claim transactions
+ *   POST /mcp                Model Context Protocol server (Streamable HTTP) with the same tools
  *
  * Docs for agents: https://tradewood.app/agents.md · OpenAPI: https://tradewood.app/openapi.json
  */
@@ -397,26 +398,175 @@ const index = (env: Env) => ({
     "GET /api/quote?tokenIn=ETH&tokenOut=USDG&amount=0.01&from=0x…&slippageBps=50": "Best route across Uniswap V2/V3/V4 plus ready-to-sign approve/swap transactions.",
     "GET /api/seed?wallet=0x…&amountUsd=50": "$WOOD seed sale terms, status, wallet position and approve/buy/claim transactions.",
   },
+  mcp: { url: `${SITE}/mcp`, transport: "streamable-http", tools: ["get_swap_quote", "get_seed_sale", "list_tokens"] },
   docs: { agents: `${SITE}/agents.md`, openapi: `${SITE}/openapi.json`, llms: `${SITE}/llms.txt`, abis: `${SITE}/abi/` },
 });
+
+
+// ───────────────────────────── /mcp (Model Context Protocol) ─────────────────────────────
+// Stateless MCP server over Streamable HTTP: clients POST JSON-RPC, we answer with plain JSON (no sessions, no SSE).
+// Same read-only tools as the REST API; nothing here can sign or send a transaction.
+
+const MCP_VERSIONS = ["2025-06-18", "2025-03-26", "2024-11-05"];
+const MCP_INSTRUCTIONS =
+  "TradeWood tools for Robinhood Chain (chain ID 4663). They only read the chain and return UNSIGNED transactions; " +
+  "the user's own wallet must sign and send them. Never ask the user for a private key or seed phrase. Before the user " +
+  "signs, show them the amounts, the minimum they will receive and any warnings. Send transactions in the order given and " +
+  "wait for an approve to confirm before the next step. Re-quote if more than a minute passes. Only use get_seed_sale to " +
+  "build a purchase when the user has read the terms and disclosures and explicitly asked to contribute a specific amount.";
+
+const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
+const MCP_TOOLS = [
+  {
+    name: "get_swap_quote",
+    title: "Quote a swap on Robinhood Chain",
+    description:
+      "Best route for a token swap across every Uniswap V2/V3/V4 pool on Robinhood Chain via the Sherwood Router (0.10% fee). " +
+      "Returns expected and minimum output, price impact, warnings and, when `from` is given, ready-to-sign transactions " +
+      "(an exact-amount approve if needed, then the swap). Tokens: \"ETH\", a listed symbol (see list_tokens) or a token address.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        tokenIn: { type: "string", description: "Token to sell: \"ETH\", a listed symbol like USDG or NVDA, or a 0x address" },
+        tokenOut: { type: "string", description: "Token to buy" },
+        amount: { type: "string", description: "Amount of tokenIn in normal units, e.g. \"0.01\"" },
+        from: { type: "string", description: "Wallet that will sign. Needed to get transactions." },
+        recipient: { type: "string", description: "Receives the output (defaults to from)" },
+        slippageBps: { type: "integer", minimum: 1, maximum: 1000, default: 50, description: "Max slippage in basis points (50 = 0.5%)" },
+        allowUnlisted: { type: "boolean", default: false, description: "Allow tokens not on TradeWood's list. Only after verifying the address." },
+        referrer: { type: "string", description: "Optional Bounty Bandits referrer address" },
+      },
+      required: ["tokenIn", "tokenOut", "amount"],
+      additionalProperties: false,
+    },
+    annotations: readOnly,
+  },
+  {
+    name: "get_seed_sale",
+    title: "$WOOD seed sale status and transactions",
+    description:
+      "Status, terms and risk disclosures of the $WOOD seed sale ($0.0075 per WOOD in USDG, $10 min, $200 per wallet, $7,500 cap, " +
+      "4 milestone tranches). With `wallet`: that wallet's contribution and claimable WOOD (plus a claim transaction if any). " +
+      "With `wallet` and `amountUsd`: approve + buy transactions. Contributions are not refundable by the contract.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        wallet: { type: "string", description: "Wallet address" },
+        amountUsd: { type: "string", description: "USD amount to contribute (paid in USDG), e.g. \"50\"" },
+      },
+      additionalProperties: false,
+    },
+    annotations: readOnly,
+  },
+  {
+    name: "list_tokens",
+    title: "List TradeWood tokens",
+    description: "Tokens listed on TradeWood (Robinhood Chain): symbol, address, decimals, category. Includes Robinhood stock tokens.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: readOnly,
+  },
+];
+
+type RpcMsg = { jsonrpc: "2.0"; id?: string | number | null; method: string; params?: Record<string, unknown> };
+
+async function mcpCall(env: Env, name: string, args: Record<string, unknown>) {
+  const u = new URL(`${SITE}/mcp`);
+  for (const [k, v] of Object.entries(args ?? {})) if (v !== undefined && v !== null && v !== "") u.searchParams.set(k, String(v));
+  const c = makeClient(env);
+  if (name === "get_swap_quote") return quote(c, u, env);
+  if (name === "get_seed_sale") return seed(c, u, env);
+  if (name === "list_tokens") return tokenList();
+  throw new ApiError(400, "unknown_tool", `Unknown tool "${name}".`);
+}
+
+async function mcpHandle(env: Env, m: RpcMsg): Promise<Record<string, unknown> | null> {
+  const reply = (result: unknown) => ({ jsonrpc: "2.0", id: m.id ?? null, result });
+  const fail = (code: number, message: string) => ({ jsonrpc: "2.0", id: m.id ?? null, error: { code, message } });
+  if (!m || m.jsonrpc !== "2.0" || typeof m.method !== "string") return fail(-32600, "Invalid request");
+  if (m.id === undefined) return null; // notification (e.g. notifications/initialized): no response
+  switch (m.method) {
+    case "initialize": {
+      const asked = String(m.params?.protocolVersion ?? "");
+      return reply({
+        protocolVersion: MCP_VERSIONS.includes(asked) ? asked : MCP_VERSIONS[0],
+        capabilities: { tools: { listChanged: false } },
+        serverInfo: { name: "tradewood", title: "TradeWood (Robinhood Chain)", version: "1.0.0", websiteUrl: SITE },
+        instructions: MCP_INSTRUCTIONS,
+      });
+    }
+    case "ping":
+      return reply({});
+    case "tools/list":
+      return reply({ tools: MCP_TOOLS });
+    case "tools/call": {
+      const name = String(m.params?.name ?? "");
+      const args = (m.params?.arguments ?? {}) as Record<string, unknown>;
+      if (!MCP_TOOLS.some((t) => t.name === name)) return fail(-32602, `Unknown tool "${name}"`);
+      try {
+        const data = await mcpCall(env, name, args);
+        const text = JSON.stringify(data, (_, v) => (typeof v === "bigint" ? v.toString() : v), 2);
+        return reply({ content: [{ type: "text", text }], structuredContent: JSON.parse(text), isError: false });
+      } catch (e) {
+        const msg = e instanceof ApiError ? `${e.code}: ${e.message}` : `upstream_error: Robinhood Chain RPC or quote error (${revertReason(e)}). Retry shortly.`;
+        return reply({ content: [{ type: "text", text: msg }], isError: true });
+      }
+    }
+    default:
+      return fail(-32601, `Method not found: ${m.method}`);
+  }
+}
+
+const MCP_CORS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "POST, GET, OPTIONS",
+  "access-control-allow-headers": "content-type, accept, mcp-protocol-version, mcp-session-id, authorization",
+  "access-control-expose-headers": "mcp-protocol-version",
+};
+
+async function mcp(req: Request, env: Env): Promise<Response> {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...MCP_CORS, "access-control-max-age": "86400" } });
+  if (req.method === "GET")
+    return new Response(
+      JSON.stringify({ name: "TradeWood MCP server", transport: "streamable-http (POST JSON-RPC to this URL)", url: `${SITE}/mcp`, tools: MCP_TOOLS.map((t) => t.name), docs: `${SITE}/agents.md` }, null, 2),
+      { status: 200, headers: { ...MCP_CORS, "content-type": "application/json" } },
+    );
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: MCP_CORS });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }), { status: 400, headers: { ...MCP_CORS, "content-type": "application/json" } });
+  }
+  const msgs = Array.isArray(body) ? (body as RpcMsg[]) : [body as RpcMsg];
+  const out = (await Promise.all(msgs.map((m) => mcpHandle(env, m)))).filter((x): x is Record<string, unknown> => x !== null);
+  if (!out.length) return new Response(null, { status: 202, headers: MCP_CORS });
+  return new Response(JSON.stringify(Array.isArray(body) ? out : out[0]), { status: 200, headers: { ...MCP_CORS, "content-type": "application/json" } });
+}
+
+
+const rpcList = (env: Env) => (env.RPC_URL ? [env.RPC_URL, ...RPCS] : RPCS);
+function makeClient(env: Env): PublicClient {
+  return createPublicClient({
+    chain: robinhoodChain,
+    // Cloudflare allows ~50 outgoing requests per invocation, so JSON-RPC calls are batched into a few HTTP requests.
+    // Robinhood's RPC takes batches of 20; dRPC's free tier only 3.
+    transport: fallback(rpcList(env).map((r) => http(r, { timeout: 12_000, retryCount: 1, batch: { batchSize: r.includes("drpc.org") ? 3 : 20, wait: 25 } }))),
+    batch: { multicall: true },
+  }) as PublicClient;
+}
 
 // ───────────────────────────── entry ─────────────────────────────
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const u = new URL(req.url);
+    if (u.pathname === "/mcp" || u.pathname === "/mcp/") return mcp(req, env);
     if (!u.pathname.startsWith("/api")) return env.ASSETS ? env.ASSETS.fetch(req) : new Response("Not found", { status: 404 });
     if (req.method === "OPTIONS")
       return new Response(null, { status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS", "access-control-allow-headers": "content-type", "access-control-max-age": "86400" } });
     if (req.method !== "GET") return json({ error: { code: "method_not_allowed", message: "Use GET." } }, 405);
-    const rpcs = env.RPC_URL ? [env.RPC_URL, ...RPCS] : RPCS;
-    const c = createPublicClient({
-      chain: robinhoodChain,
-      // Cloudflare allows ~50 outgoing requests per invocation, so JSON-RPC calls are batched into a few HTTP requests.
-      // Robinhood's RPC takes batches of 20; dRPC's free tier only 3.
-      transport: fallback(rpcs.map((r) => http(r, { timeout: 12_000, retryCount: 1, batch: { batchSize: r.includes("drpc.org") ? 3 : 20, wait: 25 } }))),
-      batch: { multicall: true },
-    }) as PublicClient;
+    const rpcs = rpcList(env);
+    const c = makeClient(env);
     const path = u.pathname.replace(/\/+$/, "") || "/api";
     try {
       if (path === "/api") return json(index(env), 200, "public, max-age=300");
