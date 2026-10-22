@@ -153,6 +153,7 @@
       <label class="check"><input type="checkbox" id="agree">
         <span>I have read the terms below. I am not in a region where this sale is restricted, and I understand that $WOOD is a digital asset with no guaranteed value, that tokens unlock in four milestone tranches after the sale closes, and that this is not financial advice.</span></label>
 
+      <p class="sub hidden" id="refLine" style="margin-top:4px"></p>
       <button class="btn primary" id="buyBtn" disabled>Connect wallet to contribute</button>
       <div class="msg" id="msg"></div>
       <p class="sub" style="margin-top:12px">Each wallet can contribute up to $200, and the round closes at the $7,500 hard cap, both enforced by the contract. Contributions are final and are not refundable by the contract.</p>
@@ -168,6 +169,18 @@
         <div class="row"><span>Claimed</span><span class="mono" id="myClaimed">0 $WOOD</span></div>
         <div class="row"><span>Unlocked</span><span class="mono" id="unlockedPct">0%</span></div>
         <div style="margin-top:14px"><button class="btn gold" id="claimBtn" disabled>Claim tokens (available after the sale closes)</button></div>
+      </div>
+
+      <div class="card" id="bountyCard">
+        <h3>Bounty Bandits: seed referrals</h3>
+        <p class="sub">Bring backers to the seed round and earn <b>10% of what they contribute</b> in $WOOD, valued at the $0.0075 seed price. A $200 contribution through your link earns you 2,666 $WOOD.</p>
+        <label class="lbl" for="refLink">Your seed referral link</label>
+        <div class="amt"><input id="refLink" class="mono" readonly value="Connect your wallet to get your link" aria-label="Your seed referral link" onfocus="this.select()" style="font-size:12px;font-weight:500;min-width:0"><button class="btn gold" id="copyRef" disabled style="width:auto;flex:none">Copy</button></div>
+        <ul class="risks" style="margin-top:12px">
+          <li>Each referred contribution is tagged with your address inside the transaction, so every referral can be checked on the explorer.</li>
+          <li>Rewards come from the Bounty Bandits allocation. They are paid after the round closes and release on the same four milestones as seed tokens.</li>
+          <li>No self-referrals. The team may exclude referrals that look like one person using several wallets.</li>
+        </ul>
       </div>
 
       <div class="card">
@@ -278,6 +291,27 @@ const sym = () => tok().sym || "USD";
 const tdec = () => tok().dec || 6;
 let state = { raised: 0, finalized: false, bps: 0, contributed: 0, allocated: 0n, claimed: 0n, claimable: 0n, bal: 0, allowance: 0n };
 
+/* ───────── Bounty Bandits seed referrals ─────────
+   The sale contract has no referrer argument, so the referrer is appended to the buyTokens calldata:
+   <buyTokens calldata><4-byte tag "TWRF" = 0x54575246><20-byte referrer address>.
+   Solidity's ABI decoder ignores trailing bytes, so the contract behaves exactly the same; the tag is
+   public in the transaction input and scripts/seed-referrals.js reads it back to compute rewards.
+   Uses the same storage key as the exchange (useReferrer.ts), so a tradewood.app/?ref= link also counts here. */
+const REF_KEY = "tradewood.referrer";
+const REF_TAG = "54575246";
+const store = {
+  get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+};
+function readReferrer() {
+  const param = new URLSearchParams(location.search).get("ref");
+  if (param && ethers.isAddress(param)) store.set(REF_KEY, ethers.getAddress(param));
+  const saved = store.get(REF_KEY);
+  return saved && ethers.isAddress(saved) ? ethers.getAddress(saved) : null;
+}
+const referrer = readReferrer();
+const activeReferrer = () => (referrer && (!account || referrer.toLowerCase() !== account.toLowerCase()) ? referrer : null);
+
 const fmtUsd = (n) => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtWood = (wei) => Number(ethers.formatUnits(wei, 18)).toLocaleString("en-US", { maximumFractionDigits: 2 });
 const usdToWood = (usd) => usd / CONFIG.SEED_PRICE_USD;
@@ -326,6 +360,11 @@ function render() {
   const need = account && live && !state.finalized && v.ok && state.allowance < ethers.parseUnits(String(Math.round((parseFloat($("amount").value) || 0) * 100) / 100), tdec());
   $("buyBtn").disabled = !v.ok;
   $("buyBtn").textContent = v.ok ? (need ? `Approve ${sym()}` : `Contribute $${parseFloat($("amount").value)} in ${sym()}`) : v.why;
+  const ref = activeReferrer();
+  $("refLine").classList.toggle("hidden", !ref);
+  if (ref) $("refLine").innerHTML = 'Referred by <span class="mono">' + short(ref) + "</span>. Your contribution will be credited to them.";
+  $("refLink").value = account ? "https://tradewood.app/seed/?ref=" + account : "Connect your wallet to get your link";
+  $("copyRef").disabled = !account;
   $("notLive").classList.toggle("hidden", live);
   $("tickState").innerHTML = "STATUS: <b>" + (!live ? "Opening soon" : state.finalized ? "Sale closed" : "Open") + "</b>";
 }
@@ -420,7 +459,14 @@ async function buy() {
       await refreshWallet(); return;
     }
     setMsg("Confirm the contribution in your wallet…");
-    const tx = await sale.buyTokens(payToken, amt);
+    const ref = activeReferrer();
+    let tx;
+    if (ref) {
+      const data = sale.interface.encodeFunctionData("buyTokens", [payToken, amt]) + REF_TAG + ref.slice(2).toLowerCase();
+      tx = await signer.sendTransaction({ to: CONFIG.SEED_CONTRACT_ADDRESS, data });
+    } else {
+      tx = await sale.buyTokens(payToken, amt);
+    }
     setMsg("Waiting for confirmation…");
     const rc = await tx.wait();
     setMsg("Contribution confirmed. Tx " + short(rc.hash), "ok");
@@ -440,6 +486,10 @@ async function claim() {
 $("connectBtn").onclick = connect;
 $("buyBtn").onclick = buy;
 $("claimBtn").onclick = claim;
+$("copyRef").onclick = async () => {
+  try { await navigator.clipboard.writeText($("refLink").value); setMsg("Referral link copied.", "ok"); }
+  catch { $("refLink").select(); setMsg("Press and hold the link to copy it.", ""); }
+};
 $("agree").onchange = render;
 $("amount").oninput = () => { renderAlloc(); render(); };
 document.querySelectorAll("[data-p]").forEach((b) => b.onclick = () => { $("amount").value = b.dataset.p; renderAlloc(); render(); });
