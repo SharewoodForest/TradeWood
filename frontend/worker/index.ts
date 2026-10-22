@@ -12,8 +12,8 @@
  * Docs for agents: https://tradewood.app/agents.md · OpenAPI: https://tradewood.app/openapi.json
  */
 import {
-  type Address, type Hex, type PublicClient, BaseError, ContractFunctionRevertedError, createPublicClient,
-  encodeFunctionData, formatUnits, getAddress, http, isAddress, parseAbi, parseUnits,
+  type Address, type Hex, type PublicClient, BaseError, ContractFunctionRevertedError, HttpRequestError, createPublicClient,
+  encodeFunctionData, fallback, formatUnits, getAddress, http, isAddress, parseAbi, parseUnits,
 } from "viem";
 import { robinhoodChain } from "@/config/chains";
 import { NATIVE, TOKENS, type Token, USDG, WETH, WOOD_SEED, erc20Abi, sherwoodRouterAbi } from "@/config/contracts";
@@ -27,6 +27,8 @@ interface Env {
 }
 
 const SITE = "https://tradewood.app";
+/** Robinhood's public RPC first, then dRPC's public endpoint (no key) if it fails from Cloudflare. */
+const RPCS = ["https://rpc.mainnet.chain.robinhood.com", "https://robinhood.drpc.org"];
 const CHAIN_ID = robinhoodChain.id;
 const DEFAULT_SLIPPAGE_BPS = 50;
 const MAX_SLIPPAGE_BPS = 1_000; // 10%
@@ -95,6 +97,8 @@ async function resolveToken(c: PublicClient, raw: string | null, name: string, a
   const v = raw?.trim();
   if (!v) throw new ApiError(400, "missing_param", `"${name}" is required: "ETH", a listed symbol (see /api/tokens) or a token address.`);
   const bySym = TOKENS.filter((t) => t.symbol.toLowerCase() === v.toLowerCase());
+  if (!bySym.length && ["wood", "$wood"].includes(v.toLowerCase()))
+    throw new ApiError(409, "wood_not_trading", "$WOOD can't be swapped yet: trading opens after the seed round. Use /api/seed to join the seed sale.", { seed: `${SITE}/api/seed` });
   if (bySym.length === 1) return bySym[0];
   if (!isAddress(v, { strict: false })) throw new ApiError(400, "unknown_token", `"${v}" is not a listed symbol or a 0x address. See /api/tokens.`);
   const a = getAddress(v.toLowerCase());
@@ -139,6 +143,8 @@ function amountParam(u: URL, t: Token): bigint {
 
 function revertReason(e: unknown): string {
   if (e instanceof BaseError) {
+    const h = e.walk((x) => x instanceof HttpRequestError);
+    if (h instanceof HttpRequestError) return `RPC HTTP ${h.status ?? "error"}${h.details ? `: ${String(h.details).slice(0, 120)}` : ""}`;
     const r = e.walk((x) => x instanceof ContractFunctionRevertedError);
     if (r instanceof ContractFunctionRevertedError) return r.data?.errorName ?? r.reason ?? r.shortMessage;
     return e.shortMessage;
@@ -387,6 +393,7 @@ const index = (env: Env) => ({
   contracts: { sherwoodRouter: env.SHERWOOD_ROUTER, woodToken: WOOD_SEED.address, woodSeedSale: env.SEED_SALE, usdg: USDG, weth: WETH },
   endpoints: {
     "GET /api/tokens": "Listed tokens (Uniswap token-list format).",
+    "GET /api/health": "RPC reachability check.",
     "GET /api/quote?tokenIn=ETH&tokenOut=USDG&amount=0.01&from=0x…&slippageBps=50": "Best route across Uniswap V2/V3/V4 plus ready-to-sign approve/swap transactions.",
     "GET /api/seed?wallet=0x…&amountUsd=50": "$WOOD seed sale terms, status, wallet position and approve/buy/claim transactions.",
   },
@@ -402,10 +409,29 @@ export default {
     if (req.method === "OPTIONS")
       return new Response(null, { status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS", "access-control-allow-headers": "content-type", "access-control-max-age": "86400" } });
     if (req.method !== "GET") return json({ error: { code: "method_not_allowed", message: "Use GET." } }, 405);
-    const c = createPublicClient({ chain: robinhoodChain, transport: http(env.RPC_URL || undefined), batch: { multicall: true } }) as PublicClient;
+    const rpcs = env.RPC_URL ? [env.RPC_URL, ...RPCS] : RPCS;
+    const c = createPublicClient({
+      chain: robinhoodChain,
+      transport: fallback(rpcs.map((r) => http(r, { timeout: 10_000, retryCount: 1 }))),
+      batch: { multicall: true },
+    }) as PublicClient;
     const path = u.pathname.replace(/\/+$/, "") || "/api";
     try {
       if (path === "/api") return json(index(env), 200, "public, max-age=300");
+      if (path === "/api/health") {
+        const checks = await Promise.all(
+          rpcs.map(async (r) => {
+            const t0 = Date.now();
+            try {
+              const cl = createPublicClient({ chain: robinhoodChain, transport: http(r, { timeout: 8_000, retryCount: 0 }) });
+              return { rpc: r, ok: true, block: await cl.getBlockNumber(), ms: Date.now() - t0 };
+            } catch (e) {
+              return { rpc: r, ok: false, error: revertReason(e), ms: Date.now() - t0 };
+            }
+          }),
+        );
+        return json({ ok: checks.some((x) => x.ok), chainId: CHAIN_ID, rpcs: checks }, checks.some((x) => x.ok) ? 200 : 503);
+      }
       if (path === "/api/tokens") return json(tokenList(), 200, "public, max-age=3600");
       if (path === "/api/quote") return json(await quote(c, u, env));
       if (path === "/api/seed") return json(await seed(c, u, env));

@@ -7,6 +7,7 @@ The agent API is read-only and needs no API key. It returns **unsigned transacti
 - API index: https://tradewood.app/api
 - OpenAPI spec: https://tradewood.app/openapi.json
 - Token list: https://tradewood.app/api/tokens (Uniswap token-list format)
+- Health: https://tradewood.app/api/health
 - ABIs: https://tradewood.app/abi/SherwoodRouter.json, /abi/WoodSeedSale.json, /abi/WoodToken.json, /abi/ERC20.json
 - RPC: https://rpc.mainnet.chain.robinhood.com · Explorer: https://robinhoodchain.blockscout.com
 
